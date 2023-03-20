@@ -9,7 +9,7 @@ tmargin={2.5cm},bmargin = {2.5cm}]{geometry}
     citecolor=black,
     filecolor=black,
     linkcolor=black,
-    urlcolor=black
+    urlcolor=blue
 }
 \linespread{1.5}
 
@@ -35,28 +35,46 @@ tmargin={2.5cm},bmargin = {2.5cm}]{geometry}
 {\Large Jena, \today}
 \end{titlepage}
 \section{Kurzfassung}
-In der Bachelorarbeit über {\myTitle} geht es um Datenorientierte Programmierung. Insbesondere wird das Entity Component System von Unity betrachtet.
+In der Bachelorarbeit über {\myTitle} geht es um Daten-orientierte Programmierung. Insbesondere wird das Entity Component System von Unity betrachtet.
 \newpage
 \tableofcontents
 \newpage
 \section{Einleitung}
 \newpage
-\section{Datenorientiertes Programmieren}
+\section{Datenorientierte Programmierung}
+\subsection{Was ist das Datenorientierte Design?}
+Data-Oriented Design \cite{Data-OrientedDesign}\\
+Probleme mit OOP: Hauptspeicher Zugriff und Cache misses. Versuche Code zu Parallelisieren sind zu viel Aufwand und bringen kaum etwas. Code ist sehr komplex.\\Datenorientiertes Design ist ein anderer Ansatz, der diese Probleme zu lösen versucht. Datenorientierung ändert die Sichtweise des Programmierens: Weg von Objekten, hin zu den eigentlichen Daten, wie diese im Speicher liegen und wie sie gelesen und verändert werden. Beim Programmieren geht es immer um das Verändern von Daten. Es ist die Beschreibung wie aus eingegebenen Daten veränderte Daten werden. Daher ergibt es Sinn sich direkt mit den Daten zu befassen. Zusätzlich: "data-oriented design" hat nichts mit \glqq data-driven\grqq{} zu tun.\\ Ideale Daten:\\Kommt auf die Daten an und wie sie genutzt werden. Am besten wenn man die Daten mit möglichst geringem Aufwand nutzen kann. Also kleinstmögliche Veränderung. Das Programms wird um die ideale Datenstruktur gebaut.\\Objekte sind oft wie Bäume gebaut. Objekte interagieren oft mit anderen Objekte \glqq unter\grqq{} ihnen. Iteriert man über eine Anzahl an Objekten passiert das mehrfach mit beliebigen Objekten. Für ein Ideales Layout sollte ein Objekt in Komponenten zerlegt werden. Komponenten der gleichen Art können dann als Gruppe zusammen im Speicher liegen, egal von welchem Objekt sie kommen. Daraus resultierten große Gruppe homogener Daten, welche dann sequenziell verarbeitet werden können.\\Vorteile:\\Parallelisierung: Die Daten können sehr leicht auf mehrere Threads aufgeteilt werden ohne großen Aufwand\\Cache Affinität: Sehr Effizient, da der selbe Code immer wieder ausgeführt wird. Wenn die Daten sequenziell verarbeitet werden resultiert das in sehr guter Performance und fast perfekter Cache Nutzung.\\Modularität: Wenn Code zur Verbesserung der Performance angepasst wird, resultiert das oft in schlechter lesbarem und schlechter wartbarem Code. Bei Konzentration auf die Transformierung der Daten hat man am Ende kleinere Funktionen mit weniger Abhängigkeiten.\\Testing: Unit Test für Objektinteraktionen können kompliziert sein. Im Datenorientierten Design sind Unit Tests jedoch sehr einfach. Eingabe Daten erstellen, Funktion aufrufen und die Ausgabedaten verifizieren.\\Nachteile: Nicht die Lösung für alles. Schwierig zu lernen, da es ganz anders ist. Auch schwierig mit bestehendem prozedurale / Objektorientiertem Code zu verbinden.\\Anwendung: Klassifizierung, wie Daten genutzt werden: read-only / read-write / write-only. Welche Daten werden von dem System gebraucht? Nicht wie verhält sich ein Gegner sonder eher wie sich alle verhalten.\\Platz für OOP?: Teils / teils. Für einzelne Objekte (beispielsweise GUI) kann es sinnvoll sein. Sollte aber dennoch Datenorientiert geschrieben werden.
+\\ DOD \cite{DOD}\\
+Datenorientiertes Design kann auch mit anderen Programmier Paradigmen co-existieren. Datenorientierung wird mehr gebraucht, da Spiele immer komplexer werden und die Abstraktion durch OOP das Bottleneck sein wird. Überall sind Daten: Graphik auf dem Bildschirm, Positionen und Bewegung von Partikeln und so weiter. All diese Daten müssen auf etwas laufen, sei es eine VM oder etwas konkretes wie der CPU oder der GPU. Diese Daten existieren auf der Hardware irgendwo. Datenorientiertes Design ist das designen von Software, welche Transformationen auf wohldefinierten Daten ausführt. 
 \newpage
-\section{Entity Component System von Unity}
-\subsection{Entities}
-\subsection{Components}
-\subsection{Systems}
+\section{Unity DOTS}
+\href{https://unity.com/de/dots}{DOTS Homepage} \\
+Unity's Datenorientierter Ansatz ist Unity's Datenorientierter Technologie-Stack. Dieser besteht aus 3 Teilen:\\
+1. Das Entity Component System (ECS) for Unity. Dies ist ein Daten-orientierter Framework für Unity. Dieser ist auch kompatibel mit GameObjects, was Unity's üblicher Objektorientierter Ansatz ist.\\2. Der Burst Compiler. Der Burst Compiler übersetzt von IL/.NET Bytecode zu optimierten nativen Code. Es nutzt die LLVM Compiler Infrastruktur.\\3. Das C\# Job System. Das Job System von Unity erlaubt parallelen Code zu schreiben, welcher sicher und schnell läuft.
+\subsection{ECS}
+\subsubsection{Entities}
+\href{https://docs.unity3d.com/Packages/com.unity.entities@0.1/manual/ecs_entities.html}{Entity Dokumentation}\\Entities repräsentieren Dinge in dem Spiel. Sie besitzen weder Daten noch ein Verhalten, sondern zeigen lediglich auf, welche Daten zusammengehören. \\Der Entitymanager managt alle Entites in einer World \href{https://docs.unity3d.com/Packages/com.unity.entities@0.1/manual/world.html}{World Dokumentation}. In dem Entitymanager sind alle Entities gespeichert und er organisiert die Daten, welche mit einem Entity in Verbindung stehen. 
+\subsubsection{Components}
+\href{https://docs.unity3d.com/Packages/com.unity.entities@0.1/manual/ecs_components.html}{Components Dokumentation}\\Components repräsentieren die Daten des Spiels. Dabei indizieren Entities die Sammlung von Components. Components sind in Unity C\# Structs, also leichtgewichtiger als Klassen.
+\subsubsection{Systems}
+\href{https://docs.unity3d.com/Packages/com.unity.entities@0.1/manual/ecs_systems.html}{Systems Dokumentation}\\
+Systems beschreiben das Verhalten.
+\subsection{Burst Compiler}
+\subsection{Job System}
 \newpage
 \section{Factory Spiel in Unity}
 \subsection{OOP}
-\subsection{ECS}
+\subsection{DOTS}
 \newpage
 \section{Benchmark}
 \newpage
 \section{Fazit}
 \newpage
 \section{Literaturverzeichnis}
+\bibliographystyle{plain}
+\bibliography{bibliography}
+
 \newpage
 \section{Anlagen}
 \newpage
