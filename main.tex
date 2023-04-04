@@ -4,6 +4,9 @@
 \usepackage[a4paper,lmargin={2cm},rmargin={2cm},
 tmargin={2.5cm},bmargin = {2.5cm}]{geometry}
 \usepackage{hyperref}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{caption}
 \hypersetup{
     colorlinks,
     citecolor=black,
@@ -11,7 +14,63 @@ tmargin={2.5cm},bmargin = {2.5cm}]{geometry}
     linkcolor=black,
     urlcolor=blue
 }
+\lstloadlanguages{csh}
+\lstset{
+language=csh,
+basicstyle=\footnotesize\ttfamily,
+numbers=left,
+numberstyle=\tiny,
+numbersep=5pt,
+tabsize=2,
+extendedchars=true,
+breaklines=true,
+frame=b,
+stringstyle=\color{blue}\ttfamily,
+showspaces=false,
+showtabs=false,
+xleftmargin=17pt,
+framexleftmargin=17pt,
+framexrightmargin=5pt,
+framexbottommargin=4pt,
+commentstyle=\color{green},
+morecomment=[l]{//}, %use comment-line-style!
+morecomment=[s]{/*}{*/}, %for multiline comments
+showstringspaces=false,
+morekeywords={ abstract, event, new, struct,
+as, explicit, null, switch,
+base, extern, object, this,
+bool, false, operator, throw,
+break, finally, out, true,
+byte, fixed, override, try,
+case, float, int2, params, typeof,
+catch, for, private, uint,
+char, foreach, protected, ulong,
+checked, goto, public, unchecked,
+class, if, readonly, unsafe,
+const, implicit, ref, ushort,
+continue, in, return, using,
+decimal, int, sbyte, virtual,
+default, interface, sealed, volatile,
+delegate, internal, short, void,
+do, is, sizeof, while,
+double, lock, stackalloc,
+else, long, static,
+enum, namespace, string},
+keywordstyle=\color{cyan},
+identifierstyle=\color{red},
+backgroundcolor=\color{cloudwhite},
+}
+\DeclareCaptionFont{white}{\color{white}}
+\DeclareCaptionFormat{listing}{\colorbox{blue}{\parbox{\textwidth}{\hspace{15pt}1#2#3}}}
+\captionsetup[lstlisting]{format=listing,labelfont=white,textfont=white, singlelinecheck=false, margin=0pt, font={bf,footnotesize}}
+
 \linespread{1.5}
+
+\definecolor{red}{rgb}{0.6,0,0} 
+\definecolor{blue}{rgb}{0,0,0.6}
+\definecolor{green}{rgb}{0,0.8,0}
+\definecolor{cyan}{rgb}{0.0,0.6,0.6}
+\definecolor{cloudwhite}{rgb}{0.9412, 0.9608, 0.8471}
 
 %Variablen
 \newcommand{\myTitle}{Unity ECS}
@@ -49,19 +108,34 @@ Probleme mit OOP: Hauptspeicher Zugriff und Cache misses. Versuche Code zu Paral
 Datenorientiertes Design kann auch mit anderen Programmier Paradigmen co-existieren. Datenorientierung wird mehr gebraucht, da Spiele immer komplexer werden und die Abstraktion durch OOP das Bottleneck sein wird. Überall sind Daten: Graphik auf dem Bildschirm, Positionen und Bewegung von Partikeln und so weiter. All diese Daten müssen auf etwas laufen, sei es eine VM oder etwas konkretes wie der CPU oder der GPU. Diese Daten existieren auf der Hardware irgendwo. Datenorientiertes Design ist das designen von Software, welche Transformationen auf wohldefinierten Daten ausführt. 
 \newpage
 \section{Unity DOTS}
+Die gesamte Bachelorarbeit wurde mit der Unity Entities Version 1.0.0-pre.65 verfasst. Dies ist Stand 01.04.2023 die aktuellste Version von Unity's Enitity Component System.\\
 \href{https://unity.com/de/dots}{DOTS Homepage} \\
 Unity's Datenorientierter Ansatz ist Unity's Datenorientierter Technologie-Stack. Dieser besteht aus 3 Teilen:\\
 1. Das Entity Component System (ECS) for Unity. Dies ist ein Daten-orientierter Framework für Unity. Dieser ist auch kompatibel mit GameObjects, was Unity's üblicher Objektorientierter Ansatz ist.\\2. Der Burst Compiler. Der Burst Compiler übersetzt von IL/.NET Bytecode zu optimierten nativen Code. Es nutzt die LLVM Compiler Infrastruktur.\\3. Das C\# Job System. Das Job System von Unity erlaubt parallelen Code zu schreiben, welcher sicher und schnell läuft.
 \subsection{ECS}
 \subsubsection{Entities}
-\href{https://docs.unity3d.com/Packages/com.unity.entities@0.1/manual/ecs_entities.html}{Entity Dokumentation}\\Entities repräsentieren Dinge in dem Spiel. Sie besitzen weder Daten noch ein Verhalten, sondern zeigen lediglich auf, welche Daten zusammengehören. \\Der Entitymanager managt alle Entites in einer World \href{https://docs.unity3d.com/Packages/com.unity.entities@0.1/manual/world.html}{World Dokumentation}. In dem Entitymanager sind alle Entities gespeichert und er organisiert die Daten, welche mit einem Entity in Verbindung stehen. 
+\href{https://docs.unity3d.com/Packages/com.unity.entities@1.0/manual/concepts-entities.html}{Entity Dokumentation}\\Entities repräsentieren Dinge in dem Spiel. Sie besitzen weder Daten noch ein Verhalten, sondern zeigen lediglich auf, welche Daten zusammengehören. \\Der Entitymanager managt alle Entites in einer World \href{https://docs.unity3d.com/Packages/com.unity.entities@0.1/manual/world.html}{World Dokumentation}. In dem Entitymanager sind alle Entities gespeichert und er organisiert die Daten, welche mit einem Entity in Verbindung stehen. 
 \subsubsection{Components}
-\href{https://docs.unity3d.com/Packages/com.unity.entities@0.1/manual/ecs_components.html}{Components Dokumentation}\\Components repräsentieren die Daten des Spiels. Dabei indizieren Entities die Sammlung von Components. Components sind in Unity C\# Structs, also leichtgewichtiger als Klassen.
+\href{https://docs.unity3d.com/Packages/com.unity.entities@1.0/manual/concepts-components.html}{Components Dokumentation}\\Components repräsentieren die Daten des Spiels. Components speichern die Daten eines Entity. Diese Daten werden von System genutzt und verarbeitet. Dabei unterscheidet man zwischen verwalteten Components und unverwalteten Components. Unverwaltete Components sind in Unity C\# Strukturen, also leichtgewichtiger als Klassen. Diese können auch nur unverwaltete Daten speichern. Verwaltete Components werden hingegen als Klassen definiert und können alle Daten halten. Es ist jedoch üblich Strukturen zu verwenden, da diese mehr Performance bieten. Um ein unverwaltetes Component zu erstellen kann man das IComponentData Interface verwenden. Ein einfaches Component könnte also wie folgt aussehen:\begin{lstlisting}[language={[Sharp]C}, caption={Component example}, label={Script}]
+using Unity.Entities;
+using Unity.Mathematics;
+
+namespace ECS.Components
+{
+    public struct ComponentExample : IComponentData
+    {
+        public int2 position;
+        public float speed;
+    }
+}
+\end{lstlisting}
+Es gibt aber auch andere Arten von Components. 
 \subsubsection{Systems}
-\href{https://docs.unity3d.com/Packages/com.unity.entities@0.1/manual/ecs_systems.html}{Systems Dokumentation}\\
-Systems beschreiben das Verhalten.
+\href{https://docs.unity3d.com/Packages/com.unity.entities@1.0/manual/concepts-systems.html}{Systems Dokumentation}\\
+Systems beschreiben das Verhalten und beinhalten die Logik zum Transformieren der Daten. Systems laufen auf dem main Thread ein mal pro ausgegebenen Bild. So wie bei den Components gibt es auch bei Systems eine Klasse für verwaltete Daten (welche in diesem Fall von der Klasse SystemBase erbt) und eine Struktur für unverwaltete Daten (welche in diesem Fall das Interface ISystem implementiert). Systems sind immer an eine World gebunden.
 \subsection{Burst Compiler}
 \subsection{Job System}
+Unity's Job System wird 
 \newpage
 \section{Factory Spiel in Unity}
 \subsection{OOP}
