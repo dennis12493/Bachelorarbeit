@@ -15,60 +15,37 @@ tmargin={2.5cm},bmargin = {2.5cm}]{geometry}
     linkcolor=black,
     urlcolor=blue
 }
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
 \lstloadlanguages{csh}
-\lstset{
-language=csh,
-basicstyle=\footnotesize\ttfamily,
-numbers=left,
-numberstyle=\tiny,
-numbersep=5pt,
-tabsize=2,
-extendedchars=true,
-breaklines=true,
-frame=b,
-stringstyle=\color{blue}\ttfamily,
-showspaces=false,
-showtabs=false,
-xleftmargin=17pt,
-framexleftmargin=17pt,
-framexrightmargin=5pt,
-framexbottommargin=4pt,
-commentstyle=\color{green},
-morecomment=[l]{//}, %use comment-line-style!
-morecomment=[s]{/*}{*/}, %for multiline comments
-showstringspaces=false,
-morekeywords={ abstract, event, new, struct,
-as, explicit, null, switch,
-base, extern, object, this,
-bool, false, operator, throw,
-break, finally, out, true,
-byte, fixed, override, try,
-case, float, int2, params, typeof,
-catch, for, private, uint,
-char, foreach, protected, ulong,
-checked, goto, public, unchecked,
-class, if, readonly, unsafe,
-const, implicit, ref, ushort,
-continue, in, return, using,
-decimal, int, sbyte, virtual,
-default, interface, sealed, volatile,
-delegate, internal, short, void,
-do, is, sizeof, while,
-double, lock, stackalloc,
-else, long, static,
-enum, namespace, string},
-keywordstyle=\color{cyan},
-identifierstyle=\color{red},
-backgroundcolor=\color{cloudwhite},
+\lstdefinestyle{code}{
+	language=csh,
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,
+    language=[Sharp]C,
+    morekeywords={int2},
+    numbers=none,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
 }
 
 \linespread{1.5}
 
-\definecolor{red}{rgb}{0.6,0,0} 
-\definecolor{blue}{rgb}{0,0,0.6}
-\definecolor{green}{rgb}{0,0.8,0}
-\definecolor{cyan}{rgb}{0.0,0.6,0.6}
-\definecolor{cloudwhite}{rgb}{0.9412, 0.9608, 0.8471}
 
 %Variablen
 \newcommand{\myTitle}{Unity ECS}
@@ -116,7 +93,7 @@ Unity's Datenorientierter Ansatz ist Unity's Datenorientierter Technologie-Stack
 \subsubsection{Entities}
 \href{https://docs.unity3d.com/Packages/com.unity.entities@1.0/manual/concepts-entities.html}{Entity Dokumentation}\\Entities repräsentieren Dinge in dem Spiel. Sie besitzen weder Daten noch ein Verhalten, sondern zeigen lediglich auf, welche Daten zusammengehören. \\Der Entitymanager managt alle Entites in einer World \href{https://docs.unity3d.com/Packages/com.unity.entities@0.1/manual/world.html}{World Dokumentation}. In dem Entitymanager sind alle Entities gespeichert und er organisiert die Daten, welche mit einem Entity in Verbindung stehen. 
 \subsubsection{Components}
-\href{https://docs.unity3d.com/Packages/com.unity.entities@1.0/manual/concepts-components.html}{Components Dokumentation}\\Components repräsentieren die Daten des Spiels. Components speichern die Daten eines Entity. Diese Daten werden von System genutzt und verarbeitet. Dabei unterscheidet man zwischen verwalteten Components und unverwalteten Components. Unverwaltete Components sind in Unity C\# Strukturen, also leichtgewichtiger als Klassen. Diese können auch nur unverwaltete Daten speichern. Verwaltete Components werden hingegen als Klassen definiert und können alle Daten halten. Es ist jedoch üblich Strukturen zu verwenden, da diese mehr Performance bieten. Um ein unverwaltetes Component zu erstellen kann man das IComponentData Interface verwenden. Ein einfaches Component könnte also wie folgt aussehen:\begin{lstlisting}[language={[Sharp]C}, caption={Component example}]
+\href{https://docs.unity3d.com/Packages/com.unity.entities@1.0/manual/concepts-components.html}{Components Dokumentation}\\Components repräsentieren die Daten des Spiels. Components speichern die Daten eines Entity. Diese Daten werden von System genutzt und verarbeitet. Dabei unterscheidet man zwischen verwalteten Components und unverwalteten Components. Unverwaltete Components sind in Unity C\# Strukturen, also leichtgewichtiger als Klassen. Diese können auch nur unverwaltete Daten speichern. Verwaltete Components werden hingegen als Klassen definiert und können alle Daten halten. Es ist jedoch üblich Strukturen zu verwenden, da diese mehr Performance bieten. Um ein unverwaltetes Component zu erstellen kann man das IComponentData Interface verwenden. Ein einfaches Component könnte also wie folgt aussehen:\begin{lstlisting}[style=code, caption={Beispiel Komponente}]
 using Unity.Entities;
 using Unity.Mathematics;
 
@@ -147,7 +124,7 @@ Run -> Main Thread, Schedule -> ein Helfer Thread, ScheduleParallel -> für jede
 Um zu sehen, welches Potential die datenorientierte Programmierung in der Spieleentwicklung bietet wurde eine Spielsimulation sowohl datenorientiert als auch objektorientiert erstellt. Das Spiel, welches simuliert und gemessen wird ist eine Art Aufbauspiel. Verglichen kann es mit dem populären Spiel \href{https://www.factorio.com/}{Factorio}. Hier wird es jedoch etwas schlichter und einfacher gehalten. Um beide Programmierparadigmen miteinander zu vergleichen wird eine kleine Fabrik in die Spielwelt generiert und vervielfältigt. Dies soll den Spieler simulieren. Die Fabrik ist abgebildet in Abbildung \ref{fig:steel}. Ganz links befinden sich zwei Kästen. Diese sollen Erzbohrer darstellen welche Eisenerz (silbern) und Kohle (braun) aus der Erde befördern und rechts auf ein Förderband legen. Die beiden Förderbänder transportieren die Kohle und das Eisenerz nach rechts weiter. Das Eisenerz wird als nächstes in Eisenbarren geschmolzen und sind deshalb rechteckig. Die Kohle und die Eisenbarren kommen dann gemeinsam in den großen Würfel, wo sie zu Stahl verarbeitet werden. Dieser Stahl wird dann wieder auf ein Förderband gelegt und in dem kleinen Würfel anschließend gelöscht. Die ganze Produktionskette soll möglichst einem Spiel nahekommen damit es eine möglichst realistische Simulation bietet und die Realität widerspiegelt. Nachfolgend wird gezeigt, wie die Spielsimulation möglichst ähnlich umgesetzt und gebenchmarkt wird.
 \subsection{Objektorientierte Programmierung}
 In der Objektorientierten Programmierung mit Unity dreht sich alles um GameObjects. Jedes Objekt in der Szene, egal ob sichtbar oder nicht ist ein GameObject. Diese GameObjects können verschiedene Komponenten haben, welche Eigenschaften definieren, also Daten speichern. Genauso haben diese Komponenten eine Start und eine Update Methode welche das Verhalten definieren. Die Start Methode wird einmalig vor dem ersten Aufruf der Update Methode ausgeführt. Die Update Methode läuft ein mal pro ausgegebenem Bild. Das Skript für eine Item sieht wie folgt aus:
-\begin{lstlisting}[language={[Sharp]C}, caption={Item Component OOP}]
+\begin{lstlisting}[style=code, caption={Item Komponente OOP}]
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -179,7 +156,7 @@ Wie man sieht beinhaltet das MonoBehaviour nicht nur die Daten, sondern auch die
 \label{fig:SerializeField}
 \end{figure}
 Eine Start Funktion ist in diesem Fall nicht notwendig. Die Update Methode bewegt das Item langsam an die übergebene Position. Time.deltaTime gibt die Zeit in Sekunden von dem letzten Bild bis zu dem momentanen Bild an. Dadurch wird die Bewegung linear.\\Ein weiterer Teil der Simulation ist die Bewegung der Items über das Förderband: 
-\begin{lstlisting}[language={[Sharp]C}, caption={Förderband Component OOP}]
+\begin{lstlisting}[style=code, caption={Förderband Komponente OOP}]
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -249,7 +226,7 @@ namespace Buildings.Components
 Für das Förderband wird eine Liste mit vorhandenen Segmenten, der Input, der Output und eine Zeit gespeichert. Die Zeit wird in der Start Methode initialisiert und der Input bzw. Output wird über die Funktion \glqq GetComponent()\grqq{} von dem GameObject geholt. In der Update Funktion wird zunächst nur die timeToMove Variable herunter gezählt. Sollte diese Variable unter Null fallen, werden alle Items von hinten nach vorne ein Segment weiter bewegt sofern dies möglich ist. Ist der Output nicht belegt wird ein vorhandenes Item in den Output gelegt. Items auf den einzelnen Segmenten werden nach weiterbewegt und wenn ein Item im Input liegt wird dies auf das erste Segment weiterbewegt. Immer wenn ein Item weitergegeben wird (egal ob an ein Segment, oder an den Output) wird auch die neue Position an das Item weitergegeben. Durch das bewegen der Items von hinten nach vorne verhindert man, dass sich Items nicht bewegen, obwohl sie es könnten.
 \subsection{Datenorientierte Programmierung}
 In der datenorientierten Programmierung gehen wir statt der GameObjects auf die Komponenten und Systeme ein. Auch hier zu Beginn die Komponente für ein Item und das dazugehörige System:
-\begin{lstlisting}[language={[Sharp]C}, caption={Item Component ECS}]
+\begin{lstlisting}[style=code, caption={Item Komponente ECS}]
 using Unity.Entities;
 using Unity.Mathematics;
 
@@ -263,7 +240,7 @@ namespace ECS.Components
 }
 \end{lstlisting}
 Auch hier wird die Position und die ID des Items gespeichert. Das dazugehörige System sieht ähnlich aus, wie das MonoBehaviour im Objektorientierten:
-\begin{lstlisting}[language={[Sharp]C}, caption={Item System}]
+\begin{lstlisting}[style=code, caption={Item System}]
 using ECS.Components;
 using Unity.Burst;
 using UnityEngine;
