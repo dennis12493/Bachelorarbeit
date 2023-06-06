@@ -122,9 +122,11 @@ Diese drei Teile werden in den folgenden Katpiteln \ref{ecs}, \ref{burst} und \r
 Bevor das \textit{Entity Component System} betrachtet wird ein kleiner Exkurs zu der herkömmlichen Weise, wie in Unity gearbeitet wird. Dies ist hilfreich um folgende Kapitel besser zu verstehen. In Unity basiert alles auf \textit{GameObjects}, die das Objektorientierte schon im Namen haben. Die \textit{GameObjects} werden immer in einer Szene erstellt, wobei es mehrere Szenen in einem Projekt geben kann. Es kann beispielsweise eine Szene für den Startbildschirm geben und eine Szene für das eigentliche Spiel. Alles was man in seiner Szene erstellt ist zunächst ein \textit{GameObject} welches man dann mit Leben füllt. Durch Komponenten die man dem \textit{GameObject} gibt, kann man sie zu Licht, Charakteren, oder Gegenständen werden lassen. Die Komponenten sind allerdings anders als die \textit{Components} aus dem \textit{Entity Component System}. In den folgenden Abschnitten erkennt man hierbei jedoch viele Parallelen zu dieser Arbeitsweise. Die Art wie man Code schreibt ist jedoch sehr unterschiedlich. Zugriffe auf Daten anderer \textit{GameObjects} funktionieren so, dass man erst auf das \textit{GameObject} zugreift und dann darüber auf seine Komponenten. Also ein typische Objektorientierter Ansatz.
 \subsection{Das \textit{Entity Component System}} \label{ecs}
 \begin{figure}[H]
-\includegraphics[scale=0.87]{Bilder/ECSConcept.png}
-\caption{Zusammenspiel von \textit{Entities}, \textit{Components} und Systemen}
+\begin{center}
+\includegraphics[scale=0.8]{Bilder/ECSConcept.png}
+\caption{Zusammenspiel von \textit{Entities}, \textit{Components} und Systemen. Beispielhaft werden hier 3 \textit{Entities} gezeigt, wobei \textit{Entity} A und B fünf \textit{Components} haben und \textit{Entity} C nur vier \textit{Components} hat. \textit{Entity} C fehlt also das \texttt{Renderer} \textit{Component}. Das System nimmt als Eingabe alle \texttt{Translation} und \texttt{Rotation} \textit{Components} und modifiziert damit das \texttt{LocalToWorld} \textit{Component} der \textit{Entities}.}
 \label{fig:ecs_concept}
+\end{center}
 \end{figure}
 \subsubsection{\textit{Entities}\footnote{https://docs.unity3d.com/Packages/com.unity.entities@1.0/manual/concepts-entities.html}}\textit{Entities} repräsentieren meist Dinge in einem Unity Spiel. Das kann der Spielcharakter, Gegenstände, oder beliebige Gegner sein. Sie können aber auch abstrakte Dinge, wie beispielsweise Events repräsentieren. Ein Entity ist vergleichbar mit einem \textit{GameObject} im Objektorientierten in Unity. \textit{Entities} besitzen hierbei jedoch weder Daten noch ein Verhalten, sondern zeigen lediglich auf, welche Daten beziehungsweise \textit{Components} zueinander gehören. Alle \textit{Entities} in einer Spielwelt gehören zu einer sogenannten Welt\footnote{https://docs.unity3d.com/Packages/com.unity.entities@0.1/manual/world.html}. Zu dieser Welt gehört genau ein \textit{Entitymanager}\footnote{https://docs.unity3d.com/Packages/com.unity.entities@1.0/api/Unity.Entities.EntityManager.html}. Der \textit{Entitymanager} organisiert alle \textit{Entities} in dieser Welt. Mit ihm lassen sich \textit{Entities} erstellen, zerstören, \textit{Components} zu \textit{Entities} hinzufügen, entfernen oder verändern.
 \subsubsection{\textit{Components}\footnote{https://docs.unity3d.com/Packages/com.unity.entities@1.0/manual/concepts-components.html}}
@@ -135,7 +137,7 @@ using Unity.Mathematics;
 
 namespace ECS.Components
 {
-    public struct ComponentExample : IComponentData
+    public struct ExampleComponent : IComponentData
     {
         public int2 position;
         public float speed;
@@ -170,42 +172,36 @@ namespace ECS.Systems
     public partial struct ExampleSystem : ISystem, ISystemStartStop
     {
         //Wird beim Erstellen des Systems ausgeführt
-        public void OnCreate(ref SystemState state)
-        {
-        }
+        public void OnCreate(ref SystemState state){}
         //Wird vor dem ersten OnUpdate des Systems ausgeführt
-        public void OnStartRunning(ref SystemState state)
-        {
-        }
+        public void OnStartRunning(ref SystemState state){}
         //Wird für jedes ausgegebene Bild ausgeführt
-        public void OnUpdate(ref SystemState state)
-        {
-        }
+        public void OnUpdate(ref SystemState state){}
         //Wird beim Stoppen des Systems ausgeführt
-        public void OnStopRunning(ref SystemState state)
-        {
-        }
+        public void OnStopRunning(ref SystemState state){}
         //Wird beim Zerstören des Systems ausgeführt
-        public void OnDestroy(ref SystemState state)
-        {
-        }
+        public void OnDestroy(ref SystemState state){}
     }
 }
 \end{lstlisting}
 Dabei ist das Interface ISystemStartStop optional und bietet die Möglichkeit bei dem Starten und Stoppen des Systems zusätzlich spezielle Logik auszuführen. Wie man sieht wird allen Funktionen auch eine Referenz des \textit{SystemState} übergeben. Darüber kann man auf verschiedene nützliche Dinge zugreifen, wie beispielsweise die \textit{World}, den \textit{EntityManager}, oder aber auch alle \textit{Components} eines Typs. Eine sinnvolle Herangehensweise ist es, in der \texttt{OnUpdate} Funktion Jobs zu schedulen. Dies wird in Kapitel \ref{jobs} weiter beschrieben.
-\subsubsection{Archetypen}
+\subsubsection{Archetypen\footnote{https://docs.unity3d.com/Packages/com.unity.entities@1.0/manual/concepts-archetypes.html}}
 \begin{figure}[H]
-\includegraphics[scale=0.87]{Bilder/ArchetypeConcept.png}
-\caption{Konzept von Archetypen}
+\begin{center}
+\includegraphics[scale=0.7]{Bilder/ArchetypeConcept.png}
+\caption{Konzept von Archetypen. \textit{Entities}, welche die gleiche Zusammenstellung von \textit{Components} haben gehören einem Archetyp an. \textit{Entity} A und B gehören durch die gleiche Zusammenstellung an \textit{Components} also dem Archetyp M an und \textit{Entity} C hat eine andere Zusammenstellung Archetyp N an.}
 \label{fig:archetype_concept}
+\end{center}
 \end{figure}
-Ein Archetyp ist eine gewisse Zusammenstellung aus \textit{Components}\footnote{https://docs.unity3d.com/Packages/com.unity.entities@1.0/manual/concepts-archetypes.html}. Jedes \textit{Entity} kann somit einem Archetyp zugeordnet werden. Beispielsweise sind alle \textit{Entities}, welche nur das ExampleComponent haben, einem Archetyp zugeordnet. \textit{Entities} welche zusätzlich \textit{Component} A besitzen gehören zu einem anderen Archetyp. Durch Archetypen ist es möglich, sehr performant, Datenorientiert zu arbeiten. Möchte man in einem System auf verschiedene \textit{Components} Operationen auszuführen, kann man alle Archetypen nach diesen \textit{Components} druchsuchen und muss nicht alle \textit{Entities} durchsuchen. Zusätzlich kann man diese Anfragen an Archetypen cachen um noch mehr Performance zu erreichen. Unity speichert alle \textit{Components} von \textit{Entities} für ein gewissen Archetyp in einem Block. Dieser wird auch \textit{chunk} genannt.
+Ein Archetyp ist eine gewisse Zusammenstellung aus \textit{Components}. Jedes \textit{Entity} kann somit einem Archetyp zugeordnet werden. Beispielsweise sind alle \textit{Entities}, welche nur das ExampleComponent haben, einem Archetyp zugeordnet. \textit{Entities} welche zusätzlich \textit{Component} A besitzen gehören zu einem anderen Archetyp. Durch Archetypen ist es möglich, sehr performant, Datenorientiert zu arbeiten. Möchte man in einem System auf verschiedene \textit{Components} Operationen auszuführen, kann man alle Archetypen nach diesen \textit{Components} druchsuchen und muss nicht alle \textit{Entities} durchsuchen. Zusätzlich kann man diese Anfragen an Archetypen cachen um noch mehr Performance zu erreichen. Unity speichert alle \textit{Components} von \textit{Entities} für ein gewissen Archetyp in einem Block. Dieser wird auch \textit{Chunks} genannt. In Abbildung \ref{fig:archetyp_chunks} sieht man eine Visualisierung wie Archetypen mit \textit{Chunks} zusammenhängen:
 \begin{figure}[H]
-\includegraphics[scale=0.5]{Bilder/ArchetypeChunkDiagram.png}
-\caption{\textit{chunks}}
+\begin{center}
+\includegraphics[scale=0.45]{Bilder/ArchetypeChunkDiagram.png}
+\caption{Konzept von \textit{Chunks}. \textit{Chunks} sind Speicherbereiche für Archetypen. In dem Bild ist zu erkennen, dass der Archetyp links vier \textit{Components} hat (Anzahl an Reihen), der Archetyp in der Mitte drei \textit{Components} und der Archetyp rechts zwei \textit{Components}. In einen \textit{Chunk} passen hier jeweils vier \textit{Entities}, wobei dies von der Anzahl und Größe der jeweiligen \textit{Components} abhängig ist. Wenn ein \textit{Chunk} voll ist, muss ein neuer \textit{Chunk} erstellt werden. Daher kann es, abhängig von der Anzahl der \textit{Entities} in einem \textit{Chunk}, unterschiedlich viele \textit{Chunks} pro Archetyp geben.}
 \label{fig:archetyp_chunks}
+\end{center}
 \end{figure}
-Jeder dieser \textit{chunks} ist 16 KiB groß. Demnach hängt es von den \textit{Components} ab, wie viele \textit{Entities} in einen \textit{chunk} passen. Der \textit{chunk} beinhaltet ein Array für jeden Typ der \textit{Components} und zusätzlich ein Array für die \textit{Entity} ID. Pro Arrayindex wird je ein \textit{Entity} gespeichert. Im Index 0 aller Arrays werden die Daten des ersten \textit{Entities} gespeichert. Falls ein \textit{Entity} zerstört, oder in einen anderen \textit{chunk} bewegt wird (falls ein \textit{Component} hinzugefügt, oder entfernt wird), wird das letzte \textit{Entity} an seine Stelle bewegt. Falls ein \textit{chunk} voll ist, erstellt der \textit{EntityManager} einen neuen falls eine \textit{Entity} hinzukommt. Leere \textit{chunks} werden gelöscht.
+Jeder dieser \textit{Chunks} ist 16 KiB groß. Demnach hängt es von den \textit{Components} ab, wie viele \textit{Entities} in einen \textit{Chunk} passen. Der \textit{Chunk} beinhaltet ein Array für jeden Typ der \textit{Components} und zusätzlich ein Array für die \textit{Entity} ID. Pro Arrayindex wird je ein \textit{Entity} gespeichert. Im Index 0 aller Arrays werden die Daten des ersten \textit{Entities} gespeichert. Falls ein \textit{Entity} zerstört, oder in einen anderen \textit{Chunk} bewegt wird (falls ein \textit{Component} hinzugefügt, oder entfernt wird), wird das letzte \textit{Entity} an seine Stelle bewegt. Falls ein \textit{Chunk} voll ist, erstellt der \textit{EntityManager} einen neuen falls eine \textit{Entity} hinzukommt. Leere \textit{Chunks} werden gelöscht.
 \subsubsection{Strukturelle Änderungen}\label{structuralChanges}
 Strukturelle Änderungen sind eines der wenigen unperformantem Themen in Unity's \textit{ECS}. Strukturelle Änderungen können das Erstellen und Zerstören eines \textit{Entities}, das Hinzufügen und Entfernen von \textit{Components}, oder das Ändern von Daten eines \textit{Shared Components} sein\footnote{https://docs.unity3d.com/Packages/com.unity.entities@1.0/manual/concepts-structural-changes.html}. Also im Grunde alles Operationen, welches das Ändern eines, oder mehrerer \textit{chunks} erfordert. Solche Änderungen könnten andere zur selben Zeit ausgeführten Aktionen invalidieren und müssen deshalb auf dem main Thread ausgeführt werden. Um dennoch Änderungen dynamisch an beliebiger Stelle ausführen zu können, nutzt man den \textit{Entity Command Buffer} (ECB). Mit dem ECB lassen sich strukturelle Änderungen sammeln und zu einem späteren Zeitpunkt in einer festgelegt Reihenfolge ausführen. So lassen sich problemlos aus einem Job strukturelle Änderungen sammeln und nach Beendigung des Jobs, diese auf dem main Thread ausführen. Das kann beispielsweise so aussehen:
 \begin{lstlisting}[style=code, caption={ECB Beispiel}]
@@ -236,11 +232,69 @@ ecb.AddComponent<ExampleComponent>(newEntity);
 Wie ein Job genau aussieht und funktioniert wird in Kapitel \ref{jobs} beschrieben.
 \subsection{Burst Compiler} \label{burst}
 \subsection{Job System} \label{jobs}
-Unity's Job System ist ein guter Weg um parallelen Code zu schreiben.
-Run -> Main Thread, Schedule -> ein Helfer Thread, ScheduleParallel -> für jedes mal Execute ein eigener Thread.
+Unity's Job System ist ein guter Weg um parallelen Code zu schreiben. Jobs werden meist in der \texttt{OnUpdate} Funktion erzeugt und ausgeführt. Dabei kann man entscheiden ob der Job auf dem \texttt{main} Thread, einem \textit{Worker} Thread, oder mehreren \textit{Worker} Threads ausgeführt werden soll. Die Anzahl an verfügbaren \textit{Worker} Threads wird dabei von der Anzahl an verfügbaren Kernen im Prozessor bestimmt. Nachdem der Job erstellt wurde, kann man ihn mit dem Funktionsaufruf \texttt{Run} (Ausführung auf dem \texttt{main} Thread), \texttt{Schedule} (Ausführung auf einem \textit{Worker} Thread), oder \texttt{ScheduleParallel} (Ausführung auf mehreren \textit{Worker} Threads) ausführen. Zusätzlich gibt es noch verschiedene Jobarten, welche auf die Arbeit mit dem ECS angepasst wurden. Dabei gibt es den \texttt{IJobEntity} und den \texttt{IJobChunk} Job.
+\subsubsection{IJobEntity}
+Der IJobEntity Job ist der Standard Job um über Daten von \textit{Components} zu iterieren. Mit ihm lässt sich leicht definieren, welche Daten man lesen oder schreiben möchte. Zusätzlich kann man noch weiter Attribute, der in dem Job befindlichen \texttt{Execute} Funktion, übergeben lassen. Ein Beispiel für ein fertig implementierten IJobEntity Job kann wiefolgt aussehen:
+\begin{lstlisting}[style=code, caption={IJobEntity Beispiel}, label=IJobEntity]
+//Beispiel Component
+public struct ExampleComponent : IComponentData { public float Value; }
+//Entities mit dem DontWantComponent werden ausgeschlossen
+[WithNone(typeof(DontWantComponent))]
+//Job ist eine Struktur und implementiert das IJobEntity Interface
+public partial struct ExampleJob : IJobEntity
+{
+	//Execute Funktion wird für jedes ExampleComponent ausgeführt
+    void Execute(Entity e, ref ExampleComponent component)
+    {
+    		//Addiert eins zu jedem ExampleComponent Wert.
+        component.Value += 1f;
+    }
+}
+//Beispiel System welches den Job verwendet
+public partial class ExampleSystem : ISystem
+{
+    protected override void OnUpdate()
+    {
+        //Job wird erstellt und auf mehreren Worker Threads ausgeführt
+        new ExampleJob().ScheduleParallel();
+    }
+}
+\end{lstlisting}
+Wie man in dem Beispiel sieht ist der Job auch wieder eine Struktur und implementiert das IJobEntity Interface. Durch dieses Interface kann man eine eigene \texttt{Execute} Funktion erstellen und anpassen. Je nach dem, welche \textit{Components} man der \texttt{Execute} Funktion übergibt, werden alle \textit{Entities} die alle diese  \textit{Components} besitzen, an die Funktion mit ihren \textit{Components} übergeben. Falls man die \textit{Entities} weiter einschränken, oder lockern will, welche der Funktion übergeben werden, kann man dies mit den Attributen \texttt{WithNone(typeof(ComponentX))} (\textit{Entities} mit dem ComponentX werden ausgeschlossen), \texttt{WithAll(typeof(ComponentX))} (\textit{Entities} müssen das ComponentX besitzen), oder \texttt{WithAny(typeof(ComponentX), typeof(ComponentY))} (\textit{Entities} müssen das ComponentX, oder das ComponentY besitzen) über dem Job definieren.\\
+In der \texttt{Execute} Funktion lässt sich dann mit den \textit{Components} arbeiten. \textit{Components} welche man nur lesen will, sollte man mit dem Schlüsselwort \texttt{in} übergeben, \textit{Components} welche man lesen und schreiben möchte, sollte man mit den Schlüsselwort \texttt{ref} (wie im Listing \ref{IJobEntity} gezeigt) übergeben. Dann kann man seine Logik so definieren, wie man sie braucht.
+\subsubsection{IJobChunk}
+Der IJobChunk Job behandelt, wie der Name schon sagt, ganze \textit{Chunks} an Daten. Dem Job wird statt eines einzelnen \textit{Entities} und seinen \textit{Components} ein ganzer \textit{Chunk} übergeben. Er kann aus dem \textit{Chunk} das komplette Array eines \textit{Component} Typs holen und dieses dann bearbeiten. Dies kann dann mit einer Schleife realisiert werden. Diese geht die Anzahl an \textit{Entities} in dem \textit{Chunk} durch und indiziert das \textit{Component} Array. Der IJobChunk Job ist eher komplexer zu implementieren. Er wird jedoch immer durch Codegenerierung von einem IJobEntity erzeugt, also ist in Wirklichkeit jeder IJobEntity eigentlich ein IJobChunk. Ein implementierter IJobChunk Job, welcher die selbe Funktion hat wie der IJobEntity Job in Listing \ref{IJobEntity}, kann so aussehen:
+\begin{lstlisting}[style=code, caption={IJobChunk Beispiel}, label=IJobChunk]
+//Job der das IJobChunk Interface implementiert
+public struct ExampleJob : IJobChunk
+{
+    //ComponentTypeHandle erlaubt es in der Execute Funktion auf die Components im Chunk zuzugreifen. Man braucht für jeden Component Typ ein eigenen ComponentTypeHandle
+    public ComponentTypeHandle<ExampleComponent> exampleTypeHandle;
+
+    //Execute Funktion, welche den kompletten Chunk übergeben bekommt. Der Integer unfilteredChunkIndex enthält den Index des Chunks welcher bearbeitet wird, da es, je nach Anzahl an Entities, auch mehr als einen geben kann. chunkEnabledMask ist eine Bitmaske. Falls das n'te Bit gesetzt ist, passt das n'te Entity in die Anforderungen des Jobs und sollte verarbeitet werden. useEnabledMask vereinfacht den Nutzen von chunkEnabledMask. Falls useEnabledMask false ist passen alle Entities zu den Anforderungen.
+    public void Execute(in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask, in v128 chunkEnabledMask)
+    {
+        //Man erhält ein Array aller Components von einem Chunk durch den ComponentTypeHandle
+        NativeArray<ExampleComponent> exampleComponents = chunk.GetNativeArray(ref exampleTypeHandle);
+        //Der ChunkEntityEnumerator gibt mittels NextEntityIndex das nächste zu bearbeitende Entity unter der Berücksichtigung von chunkEnabledMask wieder.
+        var enumerator = new ChunkEntityEnumerator(useEnabledMask, chunkEnabledMask, chunk.Count);
+        //Schleife über alle Entities die verarbeitet werden sollen
+        while(enumerator.NextEntityIndex(out var i))
+        {
+            float3 newValue = exampleComponents[i].Value + 1;
+            exampleComponents[i] = newValue;
+        }
+    }
+}
+\end{lstlisting}
+Wie man sieht ist der IJobChunk Job deutlich länger und komplexer als der IJobEntity Job, obwohl beide das gleiche machen. Jedoch kann man viel besser erkennen was wirklich bei Ausführung des Jobs passiert. Die \textit{Chunks}, welche getrennt im Speicher liegen, werden der Execute Funktion übergeben. Welche das sind kann man mit einer EntityQuery bestimmen, welche man bei dem IJobEntity nicht unbedingt benötigt. Diese kann so aussehen:
+\begin{lstlisting}[style=code, caption={EntityQuery Beispiel}, label=EntityQuery]
+EntityQuery = ?
+\end{lstlisting}
+Zusätzlich braucht man, da man \textit{Components} auch deaktivieren kann, eine BitMaske welche verhindert dass \textit{Entities} bearbeitet werden, dessen \textit{Components} deaktiviert sind. Ein IJobEntity generiert den IJobChunk so, dass automatisch darauf geachtet wird. Deshalb wird empfohlen den IJobEntity Job zu benutzen.
 \newpage
 \section{Factory Spiel in Unity}
-Um zu sehen, welches Potential die datenorientierte Programmierung in der Spieleentwicklung bietet wurde eine Spielsimulation sowohl datenorientiert als auch objektorientiert erstellt. Das Spiel, welches simuliert und gemessen wird ist eine Art Aufbauspiel. Verglichen kann es mit dem populären Spiel Factorio\footnote{https://www.factorio.com/}. Hier wird es jedoch etwas schlichter und einfacher gehalten. Um beide Programmierparadigmen miteinander zu vergleichen wird eine kleine Fabrik in die Spielwelt generiert und vervielfältigt. Dies soll den Spieler simulieren. 
+Um zu sehen, welches Potential die datenorientierte Programmierung in der Spieleentwicklung bietet wurde eine Spielsimulation sowohl datenorientiert als auch objektorientiert erstellt. Das Spiel, welches simuliert und gemessen wird ist eine Art Aufbauspiel. Verglichen kann es mit dem populären Spiel Factorio\footnote{https://www.factorio.com/}. Hier wird es jedoch etwas schlichter und einfacher gehalten. Um beide Programmierparadigmen miteinander zu vergleichen wird eine kleine Fabrik in die Spielwelt generiert und vervielfältigt. Dies soll den Spieler simulieren. In Abbildung \ref{fig:steel} sieht man wie eine Produktionsstraße für Stahl in dem Spiel aussehen kann:
 \begin{figure}[H]
 \includegraphics[scale=0.87]{Bilder/Stahl Fabrik.png}
 \caption{Eine Stahl Fabrik in der Unity Spielesimulation.}
