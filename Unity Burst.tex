@@ -1,0 +1,13 @@
+\subsection{Burst Compiler} \label{burst}
+Der Burst Compiler dient der Performance Optimierung. Er übersetzt den .NET Code zu optimierterem CPU Code welcher mit dem LLVM Compiler\footnote{https://llvm.org/} ausgeführt wird. Burst wird meist in Verbindung mit dem Job System von Unity verwendet. Dabei kann man vor allem Jobs, aber auch in ECS ganze Systeme mit Burst kompilieren. Damit etwas kompiliert wird nutzt man das \texttt{[BurstCompile]} Attribut über Jobs, oder Funktionen von Systemen:
+\begin{lstlisting}[style=code, caption={BurstCompile Attribut, um Burst zu verwenden}]
+//BurstCompile Attribut
+[BurstCompile]
+private struct ExampleJob : IJobEntity{}
+\end{lstlisting}
+Burst hat jedoch einige Einschränkungen welche Typen und Eigenschaften unterstützt werden und kann deshalb nicht überall eingesetzt werden. Vor allem mit verwalteten Datentypen kann Burst kaum umgehen, weshalb man Funktionen eines verwalteten System nicht mit Burst kompilieren kann.
+\subsubsection{Burst Kompilierung}
+Burst hat zwei Arten wie es den Code kompiliert:\\
+1. just-in-time Kompilierung: Diese Methode wird in dem Unity Editor verwendet. Das heißt der Compiler kompiliert den Code dann wenn er verwendet wird. Das bedeutet auch, dass der Code zunächst mit dem normalen Mono Compiler\footnote{https://docs.unity3d.com/Manual/Mono.html} läuft, bis Burst im Hintergrund den Code kompiliert hat. Das heißt es wird asynchron kompiliert. Man kann jedoch auch Unity, mit dem Attribut \texttt{CompileSynchronously}, dazu zwingen den Code vor dem ersten Ausführen mit Burst zu kompilieren. Dies ist beispielsweise für Laufzeitanalysen sehr vorteilhaft.\\
+2. ahead-of-time Kompilierung: Diese Methode wird bei dem bauen des Spiels verwendet. Bauen meint hierbei das Spiel von dem Unity Editor in ein ausführbares Programm umzuwandeln. Dabei speichert Burst den kompilierten Code in eine Bibliothek, welche mit dem Spiel ausgeliefert wird. Zur Laufzeit wird dann dieser Code verwendet.
+\subsubsection{Beispiele}
