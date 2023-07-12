@@ -1,0 +1,12 @@
+\begin{figure}[H]
+\centering
+\begin{annotatedFigure}
+	{\includegraphics[scale=0.31]{Bilder/Profile Analyzer.png}}
+	\annotatedFigureBox{-0.004,0.8046}{0.182,1.0073}{A}{0.182,0.8046}
+	\annotatedFigureBox{-0.003,0.4842}{0.857,0.5942}{B}{0.857,0.4842}
+	\annotatedFigureBox{-0.007,-0.0075}{0.445,0.4804}{C}{0.445,-0.0075}
+	\annotatedFigureBox{0.86,-0.0186}{1.006,1.0269}{D}{1.006,-0.0186}
+\end{annotatedFigure}
+\caption{Der Profile Analyzer im Unity Editor. Es werden die Mono- und die ECS Messdaten des Spiels miteinander verglichen. Bei A erkennt man welche Daten man gerade vergleicht und sieht dazu eine Timeline. Die Daten des Spiels mit dem ECS sind im Bild blau dargestellt, die Mono Daten rot. Bei B hat man den Vergleich des Median Bildes, also in diesem Fall des tausendsten Bildes von dem ECS und Mono. Deutlich zu erkennen ist die wesentlich kürzere Laufzeit des ECS Bildes. Bei C sieht man wichtige Spielfunktionen im Vergleich. Beispielsweise ist ganz oben der PlayerLoop (insgesamte Berechnungszeit eines Bildes). Dazu erkennt man an dem Balken, welcher der Spiele eine höhere Berechnungszeit hatte. Bei D gibt es zusätzlich noch eine Zusammenfassung über die gesamte Anzahl an Bildern und Threads in beiden Spielen.}
+\label{fig:profile_analyzer}
+\end{figure}

@@ -1,13 +1,37 @@
 \subsection{Burst Compiler} \label{burst}
-Der Burst Compiler dient der Performance Optimierung. Er übersetzt den .NET Code zu optimierterem CPU Code welcher mit dem LLVM Compiler\footnote{https://llvm.org/} ausgeführt wird. Burst wird meist in Verbindung mit dem Job System von Unity verwendet. Dabei kann man vor allem Jobs, aber auch in ECS ganze Systeme mit Burst kompilieren. Damit etwas kompiliert wird nutzt man das \texttt{[BurstCompile]} Attribut über Jobs, oder Funktionen von Systemen:
+Der Burst Compiler dient der Performance Optimierung von beschränktem Code, weshalb er besser ist als andere Compiler. Dabei sind die Schritte, wie man zu ausführbarem Code kommt wiefolgt: Zunächst wird der C\# Code von dem Roselyn C\# Compiler in die Intermediate Language (kurz IL) übersetzt. Die IL ist dabei eine Zwischensprache auf die nun verschiedene Compiler angewendet werden können. Normalerweise nutzt Unity die Mono Runtime\footnote{https://docs.unity3d.com/Manual/Mono.html}. Diese wiederum nutzt bei der Ausführung einen Just-In-Time (JIT) Compiler, welcher die gegebene IL in ausführbaren Code, sobald er gebraucht wird, umwandelt. Eine alternative zu der Mono Runtime ist die IL2CPP Runtime. Diese übersetzt die IL, Ahead-Of-Time (AOT) also vor der Ausführung, zunächst in C++ Code. Dann kann der Code von einem C++ Compiler übersetzt und ausgeführt werden.\\
+Burst bekommt auch die IL. Diese wird von Burst, welcher den LLVM Compiler\footnote{https://llvm.org/} nutzt, in ausführbaren Code übersetzt. Der große Vorteil den Burst hierbei hat, ist das Burst lediglich beschränkten Code unterstützt. Burst kann beispielsweise nicht mit  verwalteten Daten umgehen, dafür braucht es auch kein Garbage Collection. Burst hat zusätzlichen einen großen Überblick über große Teile des Codes und kann somit beispielsweise auch einen Job mit seiner Implementierung kompilieren. Durch diese Beschränktheit im Programmieren, kann Burst mehr Annahmen über den Code machen und dadurch wesentlich schnelleren Code produzieren. Da man mit dem ECS sowieso auf leicht gewichtigeren Code wert legt lässt sich dies gut mit Jobs, oder auch ganzen System verbinden. Damit Burst schneller kompilierbaren Code findet, nutzt man das \texttt{[BurstCompile]} Attribut über Jobs, oder Funktionen von Systemen innerhalb des Codes:
 \begin{lstlisting}[style=code, caption={BurstCompile Attribut, um Burst zu verwenden}]
 //BurstCompile Attribut
 [BurstCompile]
 private struct ExampleJob : IJobEntity{}
 \end{lstlisting}
-Burst hat jedoch einige Einschränkungen welche Typen und Eigenschaften unterstützt werden und kann deshalb nicht überall eingesetzt werden. Vor allem mit verwalteten Datentypen kann Burst kaum umgehen, weshalb man Funktionen eines verwalteten System nicht mit Burst kompilieren kann.
 \subsubsection{Burst Kompilierung}
 Burst hat zwei Arten wie es den Code kompiliert:\\
-1. just-in-time Kompilierung: Diese Methode wird in dem Unity Editor verwendet. Das heißt der Compiler kompiliert den Code dann wenn er verwendet wird. Das bedeutet auch, dass der Code zunächst mit dem normalen Mono Compiler\footnote{https://docs.unity3d.com/Manual/Mono.html} läuft, bis Burst im Hintergrund den Code kompiliert hat. Das heißt es wird asynchron kompiliert. Man kann jedoch auch Unity, mit dem Attribut \texttt{CompileSynchronously}, dazu zwingen den Code vor dem ersten Ausführen mit Burst zu kompilieren. Dies ist beispielsweise für Laufzeitanalysen sehr vorteilhaft.\\
-2. ahead-of-time Kompilierung: Diese Methode wird bei dem bauen des Spiels verwendet. Bauen meint hierbei das Spiel von dem Unity Editor in ein ausführbares Programm umzuwandeln. Dabei speichert Burst den kompilierten Code in eine Bibliothek, welche mit dem Spiel ausgeliefert wird. Zur Laufzeit wird dann dieser Code verwendet.
-\subsubsection{Beispiele}
+1. Just-In-Time Kompilierung: Diese Methode wird in dem Unity Editor verwendet. Das heißt der Compiler kompiliert den Code dann wenn er verwendet wird. Das bedeutet auch, dass der Code zunächst mit der normalen Mono Runtime läuft, bis Burst im Hintergrund den Code kompiliert hat. Das heißt es wird asynchron kompiliert. Man kann jedoch auch Unity, mit dem Attribut \texttt{CompileSynchronously}, dazu zwingen den Code vor dem ersten Ausführen mit Burst zu kompilieren. Dies ist beispielsweise für Laufzeitanalysen sehr vorteilhaft.\\
+2. Ahead-Of-Time Kompilierung: Diese Methode wird bei dem Bauen des Spiels verwendet. Bauen meint hierbei das Spiel von dem Unity Editor in ein ausführbares Programm umzuwandeln. Dabei speichert Burst den kompilierten Code in eine Bibliothek, welche mit dem Spiel ausgeliefert wird. Zur Laufzeit wird dann der kompilierte Code verwendet.
+\subsubsection{Beispiel Addition\footnote{https://www.youtube.com/watch?v=QkM6zEGFhDY}}
+Um ein kleines Beispiel zu geben, wie der Burst Compiler Code optimieren kann, gibt es in \hyperref[burstAddition]{Listing \ref*{burstAddition}} eine Beispielmethode welche, zwei Integer addiert und das Ergebnis zurückgibt. Das Beispiel wird einmal mit dem Burst Compiler kompiliert und dann noch einmal mit dem Mono Compiler um das Ergebnis zu vergleichen.
+\begin{lstlisting}[style=code, caption={Beispiel Addition Burst}, label = burstAddition]
+public static int Add(int ~left~, int @right@){
+	return ~left~ + @right@;
+}
+\end{lstlisting}
+Mit Burst kompiliert ergibt sich dieser LLVM Code:
+\begin{lstlisting}[style=code, caption={Addition Burst compiled}]
+Add: (LLVM x64)
+	lea eax, [~rcx~, @rdx@]
+	ret
+\end{lstlisting}
+Mono kompiliert die Methode zu diesem Code:
+\begin{lstlisting}[style=code, caption={Addition Mono compiled}]
+Add: (mono 5.16)
+	sub		$0x18, %rsp
+	mov		~%rdi, (%rsp)~
+	mov 	@%rsi, 0x8(%rsp)@
+	mov 	~%rdi, %rax~
+	add 	@0x8(%rsp)@, ~%eax~
+	add 	$0x18, %rsp
+	retq
+\end{lstlisting}
+Wie man sieht gibt es einen großen Unterschied zwischen den kompilierten Ergebnissen. Während bei dem Mono Compiler die Variablen zunächst ein paar mal verschoben werden, führt der Burst Compiler direkt die Addition (lea) aus und gibt den Wert zurück. Während einer Unity Präsentation wurde dazu folgendes gesagt: \glqq But this particular example would not really happen because most of the time this function is going to be in line by a call at the call site so you won't get this kind of code in Mono, but still the way they are parsing of arguments and so on are still here ...\grqq{}\cite{Burst-Unite_LA}
