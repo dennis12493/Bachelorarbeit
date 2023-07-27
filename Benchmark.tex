@@ -1,33 +1,38 @@
 \section{Benchmark}
-Um die Benchmark Tests reproduzierbar zu machen gibt es zunächst eine Auflistung der Komponenten, auf denen die Tests durchgeführt wurden: NVIDIA GeForce RTX 3070, Intel Core i7 12700, 32 Gb DDR 4 RAM. Die Tests liefen außerdem auf einem Windows Betriebssystem.\\ In diesem Kapitel wird nun der direkte Vergleich von dem ECS und dem objektorientierten Teil angestellt. Dazu stellt Unity einige hilfreiche Tools zu Verfügung um beispielsweise die Bilder pro Sekunde, in seinem Spiel, zu messen. Auch können man dadurch gut nachvollziehen, wie lange eine Aufgabe, wie zum Beispiel die Ausführung der Update Funktionen, benötigt hat. Bei den nachfolgenden Tests wird jeweils das implementierte Spiel, welches in \hyperref[sec:factory]{Kapitel \ref*{sec:factory}} vorgestellt wurde, verwendet. Es werden immer 2000 Bilder gemessen, wobei die letzten 2000 Bilder aufgezeichnet werden, sobald ein Stahlbarren hinten in dem Kasten angekommen ist (\hyperref[fig:steel]{Abbildung \ref*{fig:steel}}). Zusätzlich werden mehrere Durchläufe gemacht. Angefangen wird mit 100 Fabriken. Diese werden in 100er Schritten erhöht bis zu 1000 Fabriken.
+Um die Performance von Videospielen zu testen, kann man Benchmarking durchführen. Ein Benchmark ist ein Maßstab um Leistungen zu vergleichen. Hier wird das ECS mit dem objektorientierten Spiel (im Folgenden Mono genannt) verglichen. Außerdem ist die Leistungsfähigkeit zwischen ECS und Mono besonders interessant, weshalb in diesem Benchmark die Zeit gemessen wird, die ein Bild zur Berechnung gebraucht hat. Eine andere oft verwendete Einheit ist es die durchschnittlichen Bilder pro Sekunde anzugeben (fps). Die Umrechnung ist hierbei wiefolgt: $1 fps = \frac{1}{1 ms * 0.001} $\\
+In diesem Kapitel wird nun der direkte Vergleich von ECS und Mono angestellt. Dazu stellt Unity einige hilfreiche Tools zu Verfügung um Aspekte in einem Spiel zu messen. Auch können man dadurch gut nachvollziehen, wie lange eine Aufgabe, wie zum Beispiel die Ausführung der Update Funktionen, benötigt hat. Bei den nachfolgenden Tests wird jeweils das implementierte Spiel, welches in \hyperref[sec:factory]{Kapitel \ref*{sec:factory}} vorgestellt wurde, verwendet. Es werden immer 2000 Bilder gemessen, wobei die letzten 2000 Bilder aufgezeichnet werden, sobald ein Stahlbarren hinten in dem Kasten angekommen ist (\hyperref[fig:steel]{Abbildung \ref*{fig:steel}}). Zusätzlich werden mehrere Durchläufe gemacht. Angefangen wird mit einer, 10 und 100 Fabriken. In 100er Schritten werden dann die Fabriken erhöht, bis zu 1000 Fabriken.\\
+Um die Benchmark Tests reproduzierbar zu machen gibt es zunächst eine Auflistung der Komponenten, auf denen die Tests durchgeführt wurden: NVIDIA GeForce RTX 3070, Intel Core i7 12700, 32 Gb DDR 4 RAM. Die Tests liefen außerdem auf einem Windows 11 Betriebssystem.
 \subsection{Profiler}
-Mit dem Profiler kann man in Unity sein Spiel aufzeichnen und Daten über eine festgelegte Anzahl von Bildern sammeln. Dazu gehören die CPU Auslastung, der Speicherverbrauch, wie viel Objekte gezeichnet werden und noch vieles mehr. Während das Spiel läuft gibt werden diese Daten live gezeigt. Zusätzlich lassen sich die Daten auch beim pausieren des Spiel abspeichern und andere Daten laden um sie zu betrachten. Dies sieht man auch in nachfolgender \hyperref[fig:profiler]{Abbildung \ref*{fig:profiler}}. 
+Der Unity Profiler ist ein Tool, mit dem man Performance Informationen über sein Spiel bekommt. Mit dem Profiler kann man sein Spiel aufzeichnen und Daten über eine festgelegte Anzahl von Bildern sammeln. Dazu gehören die CPU Auslastung, der Speicherverbrauch, wie viele Objekte gezeichnet werden und noch vieles mehr. Während das Spiel ausgeführt wird gibt werden diese Daten live gezeigt. Zusätzlich lassen sich die Daten auch beim Pausieren des Spiel abspeichern und andere gespeicherte Daten wieder laden um sie zu betrachten. \hyperref[fig:profiler]{Abbildung \ref*{fig:profiler}} zeigt den Profiler und schon aufgezeichnete Daten. 
 \input{Profiler.tex}
-In dem Bild erkennt man die einzelnen Auslastungen und ihre Kategorien. Zusätzlich kann man ein bestimmtes Bild auswählen und erhält dazu weitere Details in der Timeline weiter unten. Diese aufgezeichneten Daten lassen sich dann in dem Profile Analyzer weiter analysieren.
+In der \hyperref[fig:profiler]{Abbildung \ref*{fig:profiler}} erkennt man die einzelnen Auslastungen und ihre Kategorien. Zusätzlich kann man ein bestimmtes Bild auswählen und erhält dazu weitere Details in der Timeline weiter unten. Diese aufgezeichneten Daten lassen sich dann in dem Profile Analyzer weiter analysieren.
 \subsection{Profile Analyzer}
-Der Profile Analyzer dient der weiteren Analyse von aufgenommenen Profilen mit dem Profiler. Zusätzlich hat man mit dem Profile Analyzer die Möglichkeit zwei Profile direkt miteinander zu vergleichen. Dies kann man in \hyperref[fig:profile_analyzer]{Abbildung \ref*{fig:profile_analyzer}} sehen.
+Der Profile Analyzer dient der weiteren Analyse von aufgenommenen Profilen mit dem Profiler. Zusätzlich hat man mit dem Profile Analyzer die Möglichkeit zwei Profile direkt miteinander zu vergleichen. Dies zeigt \hyperref[fig:profile_analyzer]{Abbildung \ref*{fig:profile_analyzer}}.
 \input{Profile Analyzer.tex}
-Oberhalb erkennt man beide Daten die man vergleichen möchte und wie viele Bilder die beiden Daten enthalten. Hier ist erkennbar, dass einmal die Daten von dem ECS mit 500 Fabriken (blau dargestellt) und dem Objektorientierten mit 500 Fabriken (rot dargestellt) verglichen werden. Die wichtigen Teile sind hierbei die zusammenfassende Übersicht (rechts), welche eine Übersicht über alle Bilder oder Threads bietet, und den Vergleich von Kernfunktionen der Spiele, wie beispielsweise der Update Funktionen und dem erstellen, oder zerstören von Objekten. Das Problem hierbei ist jedoch, dass die Kernfunktionen von dem Objektorientierten, anders heißen als die von dem Datenorientierten und man sie somit schlecht gegenüberstellen kann. Würde man zwei Objektorientierte Spiele vergleichen, hätten beide einen PlayerLoop und man würde direkt erkennen, welcher länger gebraucht hat. Dennoch kann man die Zusammenfassung der Bilder gut Nutzen und deshalb werden diese im Folgenden ausgewertet.
+Oberhalb erkennt man beide Daten die man vergleichen möchte und wie viele Bilder die beiden Daten enthalten. Hier ist erkennbar, dass einmal die Daten des ECS mit 500 Fabriken (blau dargestellt) und des Mono's mit 500 Fabriken (rot dargestellt) verglichen werden. Die wichtigen Teile sind hierbei die zusammenfassende Übersicht (rechts), welche eine Übersicht über alle Bilder oder Threads bietet, und den Vergleich von Kernfunktionen der Spiele, wie beispielsweise der Update Funktionen und dem Erstellen, oder Zerstören von Objekten. Das Problem hierbei ist jedoch, dass die Kernfunktionen von dem Objektorientierten, anders heißen als die von dem Datenorientierten und man sie somit schlecht gegenüberstellen kann. Würde man zwei Objektorientierte Spiele vergleichen, hätten beide einen PlayerLoop und man würde direkt erkennen, welcher länger gebraucht hat. Dennoch kann man die Zusammenfassung der Bilder gut Nutzen und deshalb werden diese im Folgenden ausgewertet.
 \subsection{Vergleich}
 \begin{figure}[H]
 \centering
 \includegraphics[scale=1]{Bilder/Benchmark.png}
-\caption{Der Vergleich von Monobehaviour und dem Entity Component System. Die y-Achse zeigt die durchschnittlichen Millisekunden, die ein Bild gebraucht hat. Die x-Achse zeigt die Anzahl der Fabriken im Spiel.}
+\caption{Der Vergleich von Mono und dem Entity Component System. Es werden die durchschnittlichen Millisekunden, die ein Bild zur Berechnung gebraucht hat, für verschiedene Anzahlen von Fabriken, angezeigt.}
 \label{fig:benchmark}
 \end{figure}
-\begin{tabular}[h]{c|c|c}
-Anzahl Fabriken & Mittlere Berechnungszeit pro Bild ECS & Mittlere Berechnungszeit pro Bild Mono\\
+\begin{tabular}[h]{c|c|c|c|c|c|c}
+ & \multicolumn{3}{c|}{ECS} & \multicolumn{3}{c}{Mono}\\
+Anzahl Fabriken & Min & Mean & Max & Min & Mean & Max\\
 \hline
-100 & 4.3 ms & 6.49 ms\\
-200 & 4.48 ms & 10.21 ms\\
-300 & 4.73 ms & 12.28 ms\\
-400 & 4.91 ms & 15.37 ms\\
-500 & 5.1 ms & 17.5 ms\\
-600 & 5.32 ms & 19.59 ms\\
-700 & 5.52 ms & 21.8 ms\\
-800 & 5.72 ms & 24.6 ms\\
-900 & 5.92 ms & 25.62 ms\\
-1000 & 6.2 ms & 28.61 ms\\
+1 & 2.42 ms & 3.92 ms & 10.94 ms & 2.77 ms & 3.19 ms & 8.65 ms\\
+10 & 2.46 ms & 3.96 ms & 10.47 ms & 3.0 ms & 3.7 ms & 9.33 ms\\
+100 & 3.57 ms & 3.96 ms & 9.03 ms & 5.27 ms & 6.24 ms & 13.08 ms\\
+200 & 2.76 ms & 4.25 ms & 10.87 ms & 7.87 ms & 9.27 ms & 19.16 ms\\
+300 & 3.94 ms & 4.36 ms & 9.37 ms & 10.44 ms & 12.44 ms & 25.37 ms\\
+400 & 4.18 ms & 4.6 ms & 9.82 ms & 10.61 ms & 15.03 ms & 33.69 ms\\
+500 & 4.3 ms & 4.76 ms & 9.81 ms & 11.12 ms & 17.58 ms & 39.04 ms\\
+600 & 4.52 ms & 5.01 ms & 10.56 ms & 10.66 ms & 21.14 ms & 61.65 ms\\
+700 & 4.48 ms & 5.21 ms & 10.16 ms & 9.33 ms & 21.49 ms & 53.76 ms\\
+800 & 4.48 ms & 5.39 ms & 10.89 ms & 8.51 ms & 23.11 ms & 65.15 ms\\
+900 & 4.35 ms & 5.6 ms & 10.6 ms & 8.86 ms & 28.22 ms & 76.37 ms\\
+1000 & 4.6 ms & 5.74 ms & 10.99 ms & 9.65 ms & 34.07 ms & 90.31 ms\\
 \end{tabular}
 \\\\
-In \hyperref[fig:benchmark]{Abbildung \ref*{fig:benchmark}} sieht man nun den direkten Vergleich der Laufzeiten von Monobehaviour zu dem ECS. Ganz deutlich erkennbar schneidet das Monobehaviour wesentlich schlechter ab. Das Monobehaviour braucht deutlich länger um ein Bild zu verarbeiten, gerade wenn sich die Anzahl der Fabriken erhöht. Also bestätigt das die Annahme, dass das ECS wesentlich besser darin ist große Mengen an Objekten zu verarbeiten. Auch hier steigt die durchschnittliche Zeit ein Bild zu verarbeiten, jedoch nur sehr gering. 
+\hyperref[fig:benchmark]{Abbildung \ref*{fig:benchmark}} zeigt den direkten Vergleich der Laufzeiten von Monobehaviour zu dem ECS. Ganz deutlich erkennbar schneidet Mono wesentlich schlechter ab. Mono braucht deutlich länger um ein Bild zu verarbeiten, gerade wenn sich die Anzahl der Fabriken erhöht. Also bestätigt das die Annahme, dass das ECS wesentlich besser darin ist große Mengen an Objekten zu verarbeiten. Auch hier steigt die durchschnittliche Zeit ein Bild zu verarbeiten, jedoch nur sehr gering. Eine Ausnahme bildet hier jedoch eine sehr geringe Anzahl an Fabriken. Vor allem bei einer Fabrik ist Mono schneller als das ECS. Das liegt an dem Overhead den das ECS mit sich bringt. Für eine geringe Anzahl an \textit{Entities} ist es ein großer Overhead Jobs mit unterschiedlichen Threads laufen zu lassen. Hier wäre es schneller statt einem Job die Aktionen direkt auf dem main Thread auszuführen.

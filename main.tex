@@ -9,7 +9,7 @@ tmargin={2.5cm},bmargin = {2.5cm}]{geometry}
 \usepackage{caption}
 \usepackage{tikz}
 \newcommand*\annotatedFigureBoxCustom[8]{\draw[#5,thick,rounded corners] (#1) rectangle (#2);\node at (#4) [fill=#6,thick,shape=circle,draw=#7,inner sep=2pt,font=\sffamily,text=#8] {\textbf{#3}};}
-\newcommand*\annotatedFigureBox[4]{\annotatedFigureBoxCustom{#1}{#2}{#3}{#4}{blue}{white}{black}{black}}
+\newcommand*\annotatedFigureBox[4]{\annotatedFigureBoxCustom{#1}{#2}{#3}{#4}{lightgray}{white}{black}{black}}
 \newcommand*\annotatedFigureText[4]{\node[draw=none, anchor=south west, text=#2, inner sep=0, text width=#3\linewidth,font=\sffamily] at (#1){#4};}
 \newenvironment {annotatedFigure}[1]{\centering\begin{tikzpicture}
 \node[anchor=south west,inner sep=0] (image) at (0,0) { #1};\begin{scope}[x={(image.south east)},y={(image.north west)}]}{\end{scope}\end{tikzpicture}}
@@ -71,7 +71,7 @@ tmargin={2.5cm},bmargin = {2.5cm}]{geometry}
 \linespread{1.25}
 
 %Variablen
-\newcommand{\myTitle}{Steigerung der Performanz in Videospielen durch Datenorientierte Programmierung}
+\newcommand{\myTitle}{Steigerung der Performance in Videospielen durch Datenorientierte Programmierung}
 
 \begin{document}
 \begin{titlepage}
@@ -87,7 +87,7 @@ tmargin={2.5cm},bmargin = {2.5cm}]{geometry}
 \vspace{0.5cm}
 {\large geboren am 01.10.2001\quad in Esslingen\par}
 \vspace{2cm}
-{\large Erstgutachter:\\Zweitgutachter:\par} 
+{\large Erstgutachter: Joachim Giesen \\Zweitgutachter: Julien Klaus\par} 
 \vfill
 {\Large Jena, \today}
 \end{titlepage}
@@ -95,9 +95,7 @@ tmargin={2.5cm},bmargin = {2.5cm}]{geometry}
 \thispagestyle{empty}
 \quad
 \newpage
-\thispagestyle{empty}
-\section*{Zusammenfassung}
-In der Bachelorarbeit über {\myTitle} geht es um Daten-orientierte Programmierung. Insbesondere wird das Entity Component System von Unity betrachtet.
+\input{Zusammenfassung.tex}
 \newpage
 \thispagestyle{empty}
 \quad
@@ -107,8 +105,7 @@ In der Bachelorarbeit über {\myTitle} geht es um Daten-orientierte Programmieru
 \thispagestyle{empty}
 \quad
 \newpage
-\section{Einleitung}
-Warum Unity?
+\input{Einleitung.tex}
 \newpage
 \input{Datenorientierte Programmierung.tex}
 \newpage
