@@ -1,5 +1,6 @@
 \documentclass[12pt, titlepage]{article}
 \usepackage[utf8]{inputenc}
+\usepackage[hyphens]{url}
 \usepackage{float}
 \usepackage[ngerman]{babel}
 \usepackage[stable]{footmisc}
@@ -15,8 +16,8 @@ tmargin={2.5cm},bmargin = {2.5cm}]{geometry}
 \node[anchor=south west,inner sep=0] (image) at (0,0) { #1};\begin{scope}[x={(image.south east)},y={(image.north west)}]}{\end{scope}\end{tikzpicture}}
 
 \usepackage{adjustbox}
-\let\oldhash\#%
-\DeclareRobustCommand{\#}{\adjustbox{valign=B,totalheight=.57\baselineskip}{\oldhash}}%
+\let\oldhash\#
+\DeclareRobustCommand{\#}{\adjustbox{valign=B,totalheight=.57\baselineskip}{\oldhash}}
 
 \usepackage{hyperref}
 \hypersetup{
@@ -24,7 +25,7 @@ tmargin={2.5cm},bmargin = {2.5cm}]{geometry}
     citecolor=black,
     filecolor=black,
     linkcolor=black,
-    urlcolor=blue
+    urlcolor=black
 }
 
 \usepackage{color}
@@ -34,7 +35,7 @@ tmargin={2.5cm},bmargin = {2.5cm}]{geometry}
 \definecolor{backcolour}{rgb}{0.95,0.95,0.92}
 
 \usepackage{listings}
-\lstset{literate=%
+\lstset{literate=
   {Ö}{{\"O}}1
   {Ä}{{\"A}}1
   {Ü}{{\"U}}1
@@ -43,7 +44,9 @@ tmargin={2.5cm},bmargin = {2.5cm}]{geometry}
   {ä}{{\"a}}1
   {ö}{{\"o}}1
 }
+\lstset{aboveskip=\bigskipamount,belowskip=\bigskipamount,belowcaptionskip=0pt}
 \lstdefinestyle{code}{
+    basicstyle=\small,
     backgroundcolor=\color{backcolour},   
     commentstyle=\color{codegreen},
     keywordstyle=\color{magenta},
@@ -68,29 +71,19 @@ tmargin={2.5cm},bmargin = {2.5cm}]{geometry}
     moredelim=**[is][\color{red}]{@}{@},
 }
 
+\usepackage{tocbibind}
+\renewcommand{\lstlistoflistings}{\begingroup
+\tocfile{Listingverzeichnis}{lol}
+\endgroup}
+\settocbibname{Literaturverzeichnis}
+
 \linespread{1.25}
 
 %Variablen
-\newcommand{\myTitle}{Steigerung der Performance in Videospielen durch datenorientierte Programmierung}
+\newcommand{\myTitle}{Steigerung der Performance in Videospielen durch Datenorientierte Programmierung}
 
 \begin{document}
-\begin{titlepage}
-\centering
-{\huge Friedrich-Schiller-Universität Jena \par}
-{\large Fakultät für Mathematik und Informatik\par}
-\vspace{1.5cm}
-{\huge\bfseries \myTitle\par}
-\vspace{2cm}
-{\Large Bachelorarbeit zur Erlangung des akademischen Grades\\Bachelor of Science (B.Sc.) \par}
-\vspace{3cm}
-{\large vorgelegt von Dennis Untiet\\Matrikelnummer: 192151\par}
-\vspace{0.5cm}
-{\large geboren am 01.10.2001\quad in Esslingen\par}
-\vspace{2cm}
-{\large Erstgutachter: Joachim Giesen \\Zweitgutachter: Julien Klaus\par} 
-\vfill
-{\Large Jena, \today}
-\end{titlepage}
+\input{Titelseite.tex}
 \newpage 
 \thispagestyle{empty}
 \quad
@@ -107,7 +100,13 @@ tmargin={2.5cm},bmargin = {2.5cm}]{geometry}
 \newpage
 \input{Einleitung.tex}
 \newpage
+\thispagestyle{empty}
+\quad
+\newpage
 \input{Datenorientierte Programmierung.tex}
+\newpage
+\thispagestyle{empty}
+\quad
 \newpage
 \input{Unity DOTS.tex}
 \newpage
@@ -115,27 +114,27 @@ tmargin={2.5cm},bmargin = {2.5cm}]{geometry}
 \newpage
 \input{Benchmark.tex}
 \newpage
+\thispagestyle{empty}
+\quad
+\newpage
 \input{Fazit.tex}
 \newpage 
 \thispagestyle{empty}
 \quad
 \newpage
-\lstlistoflistings
+\bibliographystyle{plain}
+\bibliography{bibliography}
 \newpage
 \listoffigures
 \newpage
-\section{Literaturverzeichnis}
-\bibliographystyle{plain}
-\bibliography{bibliography}
-
-\newpage
-\section{Anlagen}
+\lstlistoflistings
 \newpage
 \thispagestyle{empty}
 \section*{Selbstständigkeitserklärung}
 Ich, Dennis Untiet, erkläre, dass ich die vorliegende Arbeit selbstständig und nur unter Verwendung der
 angegebenen Quellen und Hilfsmittel angefertigt habe.\\
-Seitens des Verfassers bestehen Einwände die vorliegende Bachelorarbeit für die öffentliche Benutzung im
+Seitens des Verfassers bestehen keine Einwände die vorliegende Bachelorarbeit für die öffentliche Benutzung im
 Universitätsarchiv zur Verfügung zu stellen.\\
-Jena, \today, Unterschrift des Verfassenden
+\\
+Jena, \today
 \end{document}

@@ -1,8 +1,8 @@
 \subsection{Job System} \label{jobs}
-Das Job System von Unity ist ein guter Weg um parallelen Code zu schreiben. Jobs werden meist in der \texttt{OnUpdate} Funktion erzeugt und ausgeführt. Dabei kann man entscheiden, ob der Job auf dem \textit{Main Thread}, einem \textit{Worker Thread}, oder mehreren \textit{Worker Threads} ausgeführt werden soll. Die Anzahl an verfügbaren \textit{Worker Threads} wird dabei von der Anzahl an verfügbaren Kernen im Prozessor bestimmt. Nachdem der Job erstellt wurde, kann man ihn mit dem Funktionsaufruf \texttt{Run} (Ausführung auf dem \textit{Main Thread}), \texttt{Schedule} (Ausführung auf einem \textit{Worker Thread}), oder \texttt{ScheduleParallel} (Ausführung auf mehreren \textit{Worker Threads}) ausführen. Zusätzlich gibt es noch verschiedene Jobarten, welche auf die Arbeit mit dem ECS angepasst wurden.
-\subsubsection{IJobEntity}
-Der IJobEntity Job ist der Standard Job um über Daten von \textit{Components} zu iterieren. Mit ihm lässt sich leicht definieren, welche Daten man lesen oder schreiben möchte. Zusätzlich kann man noch weiter Attribute der in dem Job befindlichen \texttt{Execute} Funktion, übergeben lassen. Ein Beispiel für einen fertig implementierten IJobEntity Job kann wiefolgt aussehen:
-\begin{lstlisting}[style=code, caption={Ein IJobEntity Beispiel für eine einfache Addition.}, label=IJobEntity]
+Das Job System von Unity ist ein leichter Weg um parallelen Code auszuführen. Jobs werden meist in der \texttt{OnUpdate} Funktion erzeugt und ausgeführt. Dabei kann man entscheiden, ob der Job auf dem \textit{Main Thread}, einem \textit{Worker Thread}, oder mehreren \textit{Worker Threads} ausgeführt werden soll. Die Anzahl an verfügbaren \textit{Worker Threads} wird dabei von der Anzahl an verfügbaren Kernen im Prozessor bestimmt. Nachdem der Job erstellt wurde, kann man ihn mit dem Funktionsaufruf \texttt{Run} (Ausführung auf dem \textit{Main Thread}), \texttt{Schedule} (Ausführung auf einem \textit{Worker Thread}), oder \texttt{ScheduleParallel} (Ausführung auf mehreren \textit{Worker Threads}) ausführen. Zusätzlich gibt es noch verschiedene Jobarten, welche auf die Arbeit mit dem \textit{ECS} angepasst wurden.
+\subsubsection{Job mit einem \textit{Entity}}
+Der Job mit einem \textit{Entity} ist der Standardjob, um über Daten von \textit{Components} zu iterieren. Er implementiert das Interface \texttt{IJobEntity}. Mit ihm lässt sich leicht definieren, welche Daten man lesen oder schreiben möchte. Zusätzlich kann man noch weitere Attribute, an die in dem Job befindlichen \texttt{Execute} Methode übergeben lassen. \hyperref[IJobEntity]{Listing \ref*{IJobEntity}} zeigt einen fertig implementierten Job, der das \texttt{IJobEntity} Interface implementiert.
+\begin{lstlisting}[style=code, caption={[Beispiel für einen Job mit einem \textit{Entity} für eine einfache Addition]Beispiel für einen Job mit einem \textit{Entity} für eine einfache Addition. Der \texttt{Execute} Methode wird das \textit{Entity} und das \texttt{ExampleComponent} übergeben.}, label=IJobEntity]
 //Beispiel Component
 public struct ExampleComponent : IComponentData { public float Value; }
 //Entities mit dem DontWantComponent werden ausgeschlossen
@@ -10,7 +10,7 @@ public struct ExampleComponent : IComponentData { public float Value; }
 //Job ist eine Struktur und implementiert das IJobEntity Interface
 public partial struct ExampleJob : IJobEntity
 {
-	//Execute Funktion wird für jedes ExampleComponent ausgeführt
+    //Execute Funktion wird für jedes ExampleComponent ausgeführt
     void Execute(Entity e, ref ExampleComponent component)
     {
     		//Addiert eins zu jedem ExampleComponent Wert.
@@ -27,11 +27,11 @@ public partial class ExampleSystem : ISystem
     }
 }
 \end{lstlisting}
-Wie man in dem Beispiel, sieht ist der Job auch wieder eine Struktur und implementiert das IJobEntity Interface. Durch dieses Interface kann man eine eigene \texttt{Execute} Funktion erstellen und anpassen. Je nach dem, welche \textit{Components} man der \texttt{Execute} Funktion übergibt, werden alle \textit{Entities}, die alle diese \textit{Components} besitzen, an die Funktion übergeben. Die übergebenen \textit{Components} sind dabei die des \textit{Entities}. Falls man die \textit{Entities} weiter einschränken, oder lockern will, welche der Funktion übergeben werden, kann man dies mit den Attributen \texttt{WithNone(typeof(ComponentX))} (\textit{Entities} mit dem ComponentX werden ausgeschlossen), \texttt{WithAll(typeof(ComponentX))} (\textit{Entities} müssen das ComponentX besitzen), oder \texttt{WithAny(typeof(ComponentX), typeof(ComponentY))} (\textit{Entities} müssen das ComponentX, oder das ComponentY besitzen) über dem Job definieren.\\
-In der \texttt{Execute} Funktion lässt sich dann mit den \textit{Components} arbeiten. \textit{Components}, welche man nur lesen will, sollte man mit dem Schlüsselwort \texttt{in} übergeben, \textit{Components}, welche man lesen und schreiben möchte, sollte man mit den Schlüsselwort \texttt{ref} (wie im Listing \ref{IJobEntity} gezeigt) übergeben. Dann kann man seine Logik so definieren, wie man sie braucht.
-\subsubsection{IJobChunk}
-Der IJobChunk Job behandelt, wie der Name schon sagt, ganze \textit{Chunks} an Daten. Dem Job wird nicht nur ein einzelnes Entity mit seinen Components übergeben, sondern ein ganzer Chunk. Er kann aus dem \textit{Chunk} das komplette Array eines \textit{Component} Typs holen und dieses dann in einer Schleife bearbeiten. Diese geht die Anzahl an \textit{Entities} in dem \textit{Chunk} durch und indiziert das \textit{Component} Array. Der IJobChunk Job ist komplexer zu implementieren, als ein IJobEntity. Er wird jedoch immer durch Codegenerierung von einem IJobEntity erzeugt, also ist in Wirklichkeit jeder IJobEntity eigentlich ein IJobChunk. Ein implementierter IJobChunk Job, welcher die selbe Funktion hat wie der IJobEntity Job in Listing \ref{IJobEntity}, kann so aussehen:
-\begin{lstlisting}[style=code, caption={IJobChunk Beispiel für eine einfache Addition. Diese ist analog zu dem IJobEntity Beispiel}, label=IJobChunk]
+Wie man in dem Beispiel sieht, ist der Job auch wieder eine Struktur und implementiert das \texttt{IJobEntity} Interface. Durch dieses Interface kann man eine eigene \texttt{Execute} Methode erstellen und anpassen. Je nach dem, welche \textit{Components} man der \texttt{Execute} Methode übergibt, werden alle \textit{Entities}, welche diese \textit{Components} besitzen, an die Funktion übergeben. Die übergebenen \textit{Components} sind dabei die des \textit{Entity}. Falls man die \textit{Entities} weiter einschränken oder lockern will, welche der Funktion übergeben werden, kann man dies mit den Attributen \texttt{WithNone(} \texttt{typeof(ComponentX)} \texttt{)} (\textit{Entities} mit dem ComponentX werden ausgeschlossen), \texttt{WithAll(} \texttt{typeof(ComponentX)} \texttt{)} (\textit{Entities} müssen das ComponentX besitzen), oder \texttt{WithAny(} \texttt{typeof(} \texttt{ComponentX)} \texttt{,} \texttt{typeof(ComponentY)} \texttt{)} (\textit{Entities} müssen das ComponentX, oder das ComponentY besitzen) über dem Job definieren.\\
+In der \texttt{Execute} Funktion lässt sich dann mit den \textit{Components} arbeiten. \textit{Components}, welche man nur lesen will, sollte man mit dem Schlüsselwort \texttt{in} übergeben, \textit{Components}, welche man lesen und schreiben möchte, sollte man mit den Schlüsselwort \texttt{ref} (Zeile 9) übergeben. Dann kann man seine Logik so definieren, wie man sie braucht.
+\subsubsection{Job mit einem \textit{Chunk}}
+Der Job mit einem \textit{Chunk} implementiert das Interface \texttt{IJobChunk} und behandelt ganze \textit{Chunks} an Daten. Dem Job wird nicht nur ein einzelnes \textit{Entity} mit seinen \textit{Components} übergeben, sondern ein ganzer \textit{Chunk}, mit allen \textit{Components}, die darin enthalten sind. Er kann aus dem \textit{Chunk} das komplette Array eines \textit{Component} Typs holen und dieses dann in einer Schleife bearbeiten. Die Schleife geht die Anzahl an \textit{Entities} in dem \textit{Chunk} durch und indiziert das \textit{Component} Array. Der Job mit einem \textit{Chunk} ist komplexer zu implementieren, als ein Job mit einem \textit{Entity}. Er wird jedoch immer durch Codegenerierung von einem \texttt{IJobEntity} Job erzeugt, also ist in Wirklichkeit jeder Job mit einem \textit{Entity} eigentlich ein Job für den ganzen \textit{Chunk}. \hyperref[IJobChunk]{Listing \ref*{IJobChunk}} zeigt einen implementierten \texttt{IJobChunk} Job, welcher dieselbe Funktion hat, wie der \texttt{IJobEntity} Job in \hyperref[IJobEntity]{Listing \ref*{IJobEntity}}.
+\begin{lstlisting}[style=code, caption={[Beispiel für einen Job mit einem \textit{Chunk} für eine einfache Addition]Beispiel für einen Job mit einem \textit{Chunk} für eine einfache Addition. Dieser ist analog zu dem Beispiel für ein Job mit einem \textit{Entity}.}, label=IJobChunk]
 //Job der das IJobChunk Interface implementiert
 public struct ExampleJob : IJobChunk
 {
@@ -39,12 +39,18 @@ public struct ExampleJob : IJobChunk
     public ComponentTypeHandle<ExampleComponent> exampleTypeHandle;
 
     //Execute Funktion, welche den kompletten Chunk übergeben bekommt. Der Integer unfilteredChunkIndex enthält den Index des Chunks welcher bearbeitet wird, da es, je nach Anzahl an Entities, auch mehr als einen geben kann. chunkEnabledMask ist eine Bitmaske. Falls das n'te Bit gesetzt ist, passt das n-te Entity in die Anforderungen des Jobs und sollte verarbeitet werden. Das Attribut useEnabledMask vereinfacht den Nutzen von chunkEnabledMask. Falls useEnabledMask false ist passen alle Entities zu den Anforderungen.
-    public void Execute(in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask, in v128 chunkEnabledMask)
+    public void Execute(in ArchetypeChunk chunk, int unfilteredChunkIndex,
+        bool useEnabledMask, in v128 chunkEnabledMask)
     {
-        //Man erhält ein Array aller Components von einem Chunk durch den ComponentTypeHandle
-        NativeArray<ExampleComponent> exampleComponents = chunk.GetNativeArray(ref exampleTypeHandle);
-        //Der ChunkEntityEnumerator gibt mittels NextEntityIndex das nächste zu bearbeitende Entity unter der Berücksichtigung von chunkEnabledMask wieder.
-        var enumerator = new ChunkEntityEnumerator(useEnabledMask, chunkEnabledMask, chunk.Count);
+        //Man erhält ein Array aller Components von einem Chunk
+        //durch den ComponentTypeHandle
+        NativeArray<ExampleComponent> exampleComponents =
+            chunk.GetNativeArray(ref exampleTypeHandle);
+        //Der ChunkEntityEnumerator gibt mittels NextEntityIndex das nächste
+        //zu bearbeitende Entity unter der Berücksichtigung von
+        //chunkEnabledMask wieder.
+        var enumerator = new ChunkEntityEnumerator(useEnabledMask,
+            chunkEnabledMask, chunk.Count);
         //Schleife über alle Entities, die verarbeitet werden sollen
         while(enumerator.NextEntityIndex(out var i))
         {
@@ -54,12 +60,12 @@ public struct ExampleJob : IJobChunk
     }
 }
 \end{lstlisting}
-Wie man sieht, ist der IJobChunk Job deutlich länger und komplexer als der IJobEntity Job, obwohl beide das gleiche machen. Jedoch kann man viel besser erkennen, was wirklich bei Ausführung des Jobs passiert. Die \textit{Chunks}, welche getrennt im Speicher liegen, werden der Execute Funktion übergeben. Welche das sind kann man mit einer EntityQuery bestimmen, welche man bei dem IJobEntity nicht unbedingt benötigt. Diese kann so aussehen:
-\begin{lstlisting}[style=code, caption={EntityQuery Beispiel}, label=EntityQuery]
+Wie man sieht, ist der \texttt{IJobChunk} Job deutlich länger und komplexer als der \texttt{IJobEntity} Job, obwohl beide das Gleiche machen. Jedoch kann man viel besser erkennen, was wirklich bei der Ausführung des Jobs passiert. Die \textit{Chunks}, welche getrennt im Speicher liegen, werden der Execute Funktion übergeben. Welche das sind, kann man mit einer \textit{EntityQuery} bestimmen, welche man bei dem \texttt{IJobEntity} Job nicht unbedingt benötigt. Diese kann so aussehen:
+\begin{lstlisting}[style=code, label=EntityQuery]
 EntityQuery query = GetEntityQuery(typeof(ExampleComponent));
 \end{lstlisting}
-Mit dieser EntityQuery kann man dann den Job ausführen:
-\begin{lstlisting}[style=code, caption={EntityQuery Beispiel}, label=JobExecution]
+Mit dieser \textit{EntityQuery} kann man dann den Job ausführen:
+\begin{lstlisting}[style=code, label=JobExecution]
 protected override void OnUpdate(){
     var job = new ExampleJob();
     job.exampleTypeHandle = GetComponentTypeHandle<ExampleComponent>(false);
@@ -67,4 +73,4 @@ protected override void OnUpdate(){
     this.Dependency = job.ScheduleParallel(query, this.Dependency);
 }
 \end{lstlisting}
-Zusätzlich braucht man, da man \textit{Components} auch deaktivieren kann, eine BitMaske, welche verhindert, dass \textit{Entities} bearbeitet werden, deren \textit{Components} deaktiviert sind. Ein IJobEntity generiert den IJobChunk so, dass automatisch darauf geachtet wird. Deshalb wird empfohlen den IJobEntity Job zu nutzen, welcher einfacher zu implementieren ist.
+Zusätzlich braucht man, da man \textit{Components} auch deaktivieren kann, eine Bitmaske, welche verhindert, dass \textit{Entities} bearbeitet werden, deren \textit{Components} deaktiviert sind. Ein \texttt{IJobEntity} generiert den \texttt{IJobChunk} so, dass automatisch darauf geachtet wird. Deshalb wird empfohlen den Job mit einem \textit{Entity} zu nutzen, welcher einfacher zu implementieren ist.

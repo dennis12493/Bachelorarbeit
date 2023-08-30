@@ -1,15 +1,15 @@
-\subsection{datenorientierte Programmierung}
-In der datenorientierten Programmierung werden statt der GameObjects \textit{Components} und Systeme entworfen. Dabei werden in der Implementierung des Factory Spiel's alle Aspekte des datenorientierten Technolohgie-Stack's von Unity eingesetzt. Es werden die Daten in \textit{Components} gespeichert, welche von Systemen verarbeitet werden. Die Systeme werden größtenteils so geschrieben, dass Burst verwendet werden kann. Zusätzlich werden Job's erstellt, welche aus Systemen ausgeführt werden.\\
-Auch hier zu Beginn das \textit{Component} für ein Item und das dazugehörige System:
-\begin{lstlisting}[style=code, caption={Item Component ECS}, label=itemComponent]
+\subsection{Datenorientierte Programmierung}
+In der Datenorientierten Programmierung werden statt der GameObjects \textit{Components} und Systeme entworfen. Dabei werden in der Implementierung des Factory Spiels alle Aspekte des \textit{Datenorientierten Technologie-Stack's} von Unity eingesetzt. Es werden die Daten in \textit{Components} gespeichert, welche von Systemen verarbeitet werden. Die Systeme werden, soweit möglich, so umgesetzt, dass der Burst Compiler verwendet werden kann. Zusätzlich werden Jobs erstellt, welche aus Systemen ausgeführt werden.\\
+Das Item \textit{Component} des datenorientierten Ansatzes zeigt \hyperref[lstItemComponent]{Listing \ref*{lstItemComponent}}.
+\begin{lstlisting}[style=code, caption={[Item \textit{Component} im datenorientierten Ansatz]Item \textit{Component} im datenorientierten Ansatz. Es werden nur die Daten des Items gespeichert. Die Logik des Items befindet sich in einem System.}, label=lstItemComponent]
 public struct ItemComponent : IComponentData
 {
     public int2 pos;
     public int itemID;
 }
 \end{lstlisting}
-In dem \textit{Component} wird die Position und die ID des Items gespeichert. Was direkt auffällt ist die klare Trennung der Daten von der Logik, welche sich hier in einem System befindet. Das dazugehörige System sieht anders aus als das MonoBehaviour im Objektorientierten, die Logik ist jedoch dieselbe:
-\begin{lstlisting}[style=code, caption={Item System und Job zum Bewegen von Items}]
+In dem \texttt{ItemComponent} wird die Position und die ID des Items gespeichert. Was direkt auffällt, ist die klare Trennung der Daten von der Logik, welche sich hier in einem System befindet. Die Logik des objektorientierten Items (\hyperref[lstItemKomponente]{Listing \ref*{lstItemKomponente}}) befindet sich im datenorientierten Ansatz in dem \texttt{ItemSystem} in \hyperref[lstItemSystem]{Listing \ref*{lstItemSystem}}.
+\begin{lstlisting}[style=code, caption={[Item System im datenorientierten Ansatz.]Item System zum Bewegen von Items im datenorientierten Ansatz. Aus der \texttt{OnUpdate} Methode wird ein Job geschedult, welcher die Items bewegt.}, label=lstItemSystem]
 [BurstCompile(CompileSynchronously = true)]
 public partial struct ItemSystem : ISystem
 {
@@ -29,7 +29,8 @@ public partial struct ItemSystem : ISystem
         public float deltaTime;
         
         [BurstCompile(CompileSynchronously = true)]
-        private void Execute(ref LocalTransform transform, in ItemComponent item)
+        private void Execute(ref LocalTransform transform,
+            in ItemComponent item)
         {
         	//Gegenstand wird zu der übergebenen Position pos bewegt
             transform = transform.WithPosition(
@@ -40,36 +41,33 @@ public partial struct ItemSystem : ISystem
     }
 }
 \end{lstlisting}
-Das Item System ist durch das implementierte Interface \texttt{ISystem} als System defniniert und kann daher die \texttt{OnUpdate} Funktion nutzen. Bei dem Item System kommt zusätzlich auch der Burst Compiler und das Job System zum Einsatz. Das Attribut \texttt{BurstCompile} hilft dem Burst Compiler Methoden zu finden, welche mit Burst kompiliert werden sollen. \textit{CompileSynchronously} dient dem testen und besagt, dass erst das System durch den Burst Compiler kompiliert werden muss bevor es zum ersten Mal ausgeführt wird. Andernfalls könnte das System schon laufen, ohne den Burst Compiler genutzt zu haben. Die Methode \texttt{OnUpdate} wird ein mal pro Bild aufgerufen. Sie ist zu vergleichen mit der \texttt{Update} Methode in einem MonoBehaviour. Hier wird der \texttt{IJobEntity} ItemMoveJob erstellt. Dieser Job funktioniert mit einem LocalTransform Component, welches jedes Entity besitzt und die Position angibt, und mit dem ItemComponent aus \hyperref[itemComponent]{Listing \ref{itemComponent}}. Dabei wird das LocalTransform Component zum lesen und schreiben verwendet (erkennbar durch das Keywort ref) und das ItemComponent lediglich zum lesen (erkannbar durch das Keywort in). Auch hier wird, wie in dem Monobehaviour, nun die Position des Items mithilfe der Lerp Funktion von Vector3 und den Daten im ItemComponent verändert. Dieser Job, welcher die tatsächliche Logik für das Item enthält wird in der \texttt{OnUpdate} Methode parallel gescheduled. Dies ist hier speziell sehr vorteilhaft, da es sehr viele Items auf dem Spielfeld geben kann. Dadurch werden nicht tausende Items nacheinander bewegt, sondern alle parallel.\\
-Die übergebene Position kommt, wie auch in dem Objektorientierten, von dem Förderband. Auch hier ist die Förderbandlogik in einem Job implementiert. Das hat den Vorteil, dass man dies wieder gut parallelisieren kann. Die Vorgehensweise, dass man die Items von hinten nach vorne ein Förderbandsegment weiterbewegt bleibt jedoch gleich. Ganz anders ist die Methode, wenn man Items erstellen will. Da man mit einem geschedulten Job sich nicht mehr auf dem \textit{Main Thread} befindet, kann man Items nicht mehr direkt erstellen.
-\begin{lstlisting}[style=code, caption={Create Item System}]
+Das \texttt{ItemSystem} ist durch das implementierte Interface \texttt{ISystem} als System defniniert und kann daher die \texttt{OnUpdate} Methode nutzen. Bei dem Item System kommt zusätzlich auch der Burst Compiler und das Job System zum Einsatz. Das Attribut \texttt{BurstCompile} hilft dem Burst Compiler Methoden zu finden, welche mit Burst kompiliert werden sollen. \texttt{CompileSynchronously} dient dem Testen und besagt, dass erst das System durch den Burst Compiler kompiliert werden muss, bevor es zum ersten Mal ausgeführt wird. Andernfalls könnte das System schon laufen, ohne von dem Burst Compiler profitiert zu haben. Die Methode \texttt{OnUpdate} wird ein mal pro Bild aufgerufen (Zeile 5). Sie ist zu vergleichen mit der \texttt{Update} Methode in einem \texttt{MonoBehaviour}. In der \texttt{OnUpdate} Methode wird der \texttt{ItemMoveJob} erstellt (Zeile 8 - 11). Dieser Job funktioniert mit dem \texttt{ItemComponent} und \texttt{LocalTransform} \textit{Component} eines \textit{Entities}. Das \texttt{LocalTransform} \textit{Component} gibt die Position des \textit{Entities} an. Das \texttt{ItemComponent} \textit{Component} ist in \hyperref[lstItemComponent]{Listing \ref{lstItemComponent}} definiert und speichert die Daten des Items. In dem Job wird das \texttt{LocalTransform} \textit{Component} zum Lesen und Schreiben verwendet (erkennbar durch das Keywort \texttt{ref}) und das \texttt{ItemComponent} lediglich zum Lesen (erkennbar durch das Keywort \texttt{in}) (Zeile 20 - 21). Auch hier wird, wie in dem \texttt{MonoBehaviour}, nun die Position des Items mithilfe der \texttt{Lerp} Funktion von \texttt{Vector3} und den Daten im \texttt{ItemComponent} verändert (Zeile 24 - 26). Dieser Job, welcher die tatsächliche Logik für das Item enthält, wird in der \texttt{OnUpdate} Methode parallel gescheduled (Zeile 11). Dies ist hier speziell sehr vorteilhaft, da es sehr viele Items auf dem Spielfeld geben kann. Dadurch werden nicht tausende Items nacheinander bewegt, sondern alle parallel.\\
+Die übergebene Position kommt, wie auch in dem objektorientierten Ansatz, von dem Förderband. Auch hier ist die Förderbandlogik in einem Job implementiert. Die Vorgehensweise, dass man die Items von hinten nach vorne ein Förderbandsegment weiterbewegt bleibt jedoch gleich. Ganz anders ist die Funktionsweise, wenn man Items erstellen will. Da man sich mit einem geschedulten Job nicht mehr auf dem \textit{Main Thread} befindet, kann man Items nicht mehr direkt erstellen.
+\begin{lstlisting}[style=code, caption={[Erstellung eines Items im datenorientierten Ansatz.]Erstellung eines Items im datenorientierten Ansatz. Zur Erstellung eines Items aus einem Job, wird ein \textit{Entity Command Buffer} verwendet.}]
 [BurstCompile(CompileSynchronously = true)]
 [UpdateAfter(typeof(ProcessingBuildingSystem))]
-public partial struct CreateItemSystem : ISystem
-{
-	//Lookup um Daten eines anderen Entity auszulesen
+public partial struct CreateItemSystem : ISystem {
+    //Lookup um Daten eines anderen Entity auszulesen
     private ComponentLookup<InputConveyorComponent> inputLookup;
 
     [BurstCompile(CompileSynchronously = true)]
-    public void OnCreate(ref SystemState state)
-    {
+    public void OnCreate(ref SystemState state) {
       	//Für die OnUpdate Funktion wird das ItemEntitiesComponent gebraucht
       	//Darin sind alle Items für das Erstellen gespeichert
         state.RequireForUpdate<ItemEntitiesComponent>();
         inputLookup = state.GetComponentLookup<InputConveyorComponent>();
     }
-
+    
     [BurstCompile(CompileSynchronously = true)]
-    public void OnUpdate(ref SystemState state)
-    {
+    public void OnUpdate(ref SystemState state) {
         inputLookup.Update(ref state);
-        var ecbSingleton = SystemAPI.GetSingleton<BeginSimulationEntityCommandBufferSystem.Singleton>();
+        var ecbSingleton = SystemAPI.GetSingleton
+            <BeginSimulationEntityCommandBufferSystem.Singleton>();
         //Entity Command Buffer wird erstellt
         var ecb = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged);
         var itemEntities = SystemAPI.GetSingleton<ItemEntitiesComponent>();
         // Job wird erstellt und gescheduled
-        new CreateItemJob
-        {
+        new CreateItemJob {
             inputLookup = inputLookup,
             ecb = ecb,
             itemEntities = itemEntities
@@ -78,29 +76,26 @@ public partial struct CreateItemSystem : ISystem
     }
 }
 \end{lstlisting}
-Hier sieht man eine Besonderheit des \textit{Entity Component Systems}, der \textit{Entity Command Buffer} (ECB). Dadurch dass strukturelle Änderungen nur auf dem \textit{Main Thread} passieren dürfen braucht man einen ECB um diese Änderungen zu sammeln und an späteren Stelle auf dem \textit{Main Thread} auszuführem. Hier wird der ECB verwendet um strukturelle Änderungen aus einem Job vorzunehmen.
-\begin{lstlisting}[style=code, caption={Create Item Job}]
+Hier sieht man eine Besonderheit des \textit{Entity Component Systems}, der \textit{Entity Command Buffer} (\textit{ECB}). Dadurch, dass strukturelle Änderungen nur auf dem \textit{Main Thread} passieren dürfen, braucht man einen \textit{ECB} um diese Änderungen zu sammeln und an späteren Stelle auf dem \textit{Main Thread} auszuführen. Dafür wird ein \textit{ECB} erstellt (Zeile 21) und dieser dem Job übergeben (Zeile 26). \hyperref[lstCreateItemJob]{Listing \ref{lstCreateItemJob}} zeigt den Job, der diese strukturellen Änderungen vornimmt.
+\begin{lstlisting}[style=code, caption={[Job in dem ein \textit{ECB} verwendet wird]Job in dem ein \textit{ECB} verwendet wird. Der \textit{ECB} sammelt die Änderungen aus dem Job und spielt sie nach dem Job wieder ab.}, label=lstCreateItemJob]
 [BurstCompile(CompileSynchronously = true)]
 [WithNone(typeof(OutputNotFoundTag))]
-public partial struct CreateItemJob : IJobEntity
-{
+public partial struct CreateItemJob : IJobEntity {
     public EntityCommandBuffer ecb;
     //Wenn nur von gelesen wird kann ReadOnly verwendet werden
     [ReadOnly] public ComponentLookup<InputConveyorComponent> inputLookup;
     [ReadOnly] public ItemEntitiesComponent itemEntities;
 
     [BurstCompile(CompileSynchronously = true)]
-    //Job arbeitet mit dem Output eines Gebäudes
-    private void Execute(ref OutputProcessingBuildingComponent output)
-    {
-        //Wenn der Output leer ist gibt es nichts zu tun
+    private void Execute(ref OutputProcessingBuildingComponent output) {
+        //Wenn die Ausgabe leer ist gibt es nichts zu tun
         if(output.itemID == -1) return;
         var itemID = output.itemID;
         var input = inputLookup[output.outputEntity];
-        //Wenn Input des Förderbandes belegt ist wird auch keine
+        //Wenn die Eingabe des Förderbandes belegt ist wird auch keine
         //Änderung vorgenommen
         if(input.occupied || input.item != Entity.Null) return;
-        //Item wird aus dem Output entfernt und mittels ECB
+        //Item wird aus der Ausgabe entfernt und mittels ECB
         //wird ein neues Item erstellt 
         output.itemID = -1;
         output.itemCreated = true;
@@ -112,11 +107,11 @@ public partial struct CreateItemJob : IJobEntity
             quaternion.identity, 0.5f));
         ecb.SetComponent(item,
             new ItemComponent{pos = output.pos, itemID = itemID});
-        //Input wird das Item zugewiesen
+        //Der Eingabe wird das Item zugewiesen
         ecb.SetComponent(output.outputEntity,
-            new InputConveyorComponent{
+            new InputConveyorComponent {
             item = item, pos = input.pos, occupied = true});
     }
 }
 \end{lstlisting}
-Der \textit{Entity Command Buffer} erstellt das Item und ändert noch in den \textit{Components} die Position des Items. Zusätzlich wird dem Input des Förderbandes das erstellte Item zugewiesen. Diese Änderungen werden in dem Job aufgenommen und nach dem Job in der richtigen Reihenfolge angewendet.
+Der \textit{ECB} erstellt das Item (Zeile 23) und ändert noch in den \textit{Components} die Position des Items (Zeile 25 - 29). Zusätzlich wird der Eingabe des Förderbandes das erstellte Item zugewiesen (Zeile 31 - 33). Diese Änderungen werden in dem Job aufgenommen und nach dem Job in der richtigen Reihenfolge angewendet.
